@@ -1,0 +1,2481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>减脂增肌 · 饮食运动记录</title>
+<style>
+:root{
+  --bg:#f2f4f7; --card:#fff; --text:#111827; --sub:#6b7280; --line:#e5e7eb;
+  --pri:#10b981; --bar:#e5e7eb; --danger:#ef4444; --warn:#f59e0b; --info:#3b82f6;
+  --cP:#f97316; --cF:#eab308; --cC:#6366f1; --cFib:#14b8a6;
+}
+[data-theme=dark]{
+  --bg:#0b1120; --card:#141b2d; --text:#e6eaf2; --sub:#8fa0b8; --line:#243049;
+  --bar:#2b3a58;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.5;overscroll-behavior-y:contain}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-action:manipulation}
+input,select,textarea{font:inherit;color:var(--text);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;width:100%;font-size:16px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--pri);border-color:transparent}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--pri)}
+label{display:block;margin:10px 0 4px;font-size:13px;color:var(--sub)}
+.hint{font-size:12px;color:var(--sub);margin-top:4px}
+main{max-width:520px;margin:0 auto;padding:56px 12px 84px}
+.page{display:none}.page.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.row{display:flex;align-items:center;gap:10px}
+.row2{display:flex;gap:10px;margin-bottom:12px}
+.row2>*{flex:1}
+.grow{flex:1}
+.center{text-align:center}
+b.num{font-variant-numeric:tabular-nums}
+/* 顶部日期条 */
+#datebar{position:fixed;top:0;left:0;right:0;max-width:520px;margin:0 auto;display:flex;align-items:center;gap:4px;padding:8px 12px;background:var(--card);border-bottom:1px solid var(--line);z-index:20}
+#datebar button{padding:8px 10px;border-radius:8px;font-size:16px}
+#dbLabel{flex:1;font-weight:700;font-size:15px}
+#dbToday{color:var(--pri);font-weight:700;display:none}
+/* 底部导航 */
+#tabbar{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:20}
+#tabbar button{flex:1;padding:7px 0 9px;font-size:11px;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:1px}
+#tabbar button b{font-size:20px;font-weight:400}
+#tabbar button.on{color:var(--pri);font-weight:700}
+/* 通用组件 */
+.btn{display:block;width:100%;padding:12px;border-radius:12px;background:var(--pri);color:#fff;font-weight:700;font-size:16px;text-align:center}
+.btn.ghost{background:var(--bar);color:var(--text)}
+.btn.danger{background:var(--danger)}
+.btn.on{box-shadow:0 0 0 2px var(--pri)}
+.btn.small{display:inline-block;width:auto;padding:8px 14px;font-size:14px;border-radius:10px}
+.mhead{display:flex;align-items:center;gap:6px;font-weight:700;margin-bottom:8px}
+.mhead .mcal{margin-left:auto;color:var(--sub);font-weight:600;font-size:13px}
+.addbtn{margin-left:auto;width:30px;height:30px;border-radius:50%;background:var(--pri);color:#fff;font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center;font-weight:700}
+.addbtn.plain{background:var(--bar);color:var(--text)}
+.empty{color:var(--sub);font-size:13px;padding:8px 0;text-align:center}
+.item{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:0}
+.item .iname{font-weight:600;font-size:15px}
+.item .isub{font-size:12px;color:var(--sub)}
+.item .ival{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.item .del{color:var(--danger);font-size:13px;padding:6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:7px 13px;border-radius:999px;background:var(--bar);font-size:13px;font-weight:600}
+.item.dragging{opacity:.35}
+.card.droptar{border-color:var(--pri);box-shadow:0 0 0 2px var(--pri)}
+#dragGhost{position:fixed;left:0;top:0;z-index:120;pointer-events:none;background:var(--card);color:var(--text);border:1px solid var(--pri);border-radius:10px;padding:7px 11px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.grip{color:var(--sub);font-size:15px;letter-spacing:-1px;padding:0 4px 0 0;user-select:none;-webkit-user-select:none;cursor:grab}
+.chip.on{background:var(--pri);color:#fff}
+/* 进度条 */
+.bar{height:10px;background:var(--bar);border-radius:5px;overflow:hidden;flex:1}
+.bar i{display:block;height:100%;border-radius:5px}
+.bar i.low{background:#94a3b8}.bar i.mid{background:#38bdf8}
+.bar i.ok{background:var(--pri)}.bar i.over{background:var(--warn)}.bar i.bad{background:var(--danger)}
+.prow{margin:10px 0}
+.prow .pt{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}
+.prow .pt b{font-variant-numeric:tabular-nums}
+.prow .pt .pv{color:var(--sub)}
+.prow .pt .pct{font-weight:700}
+.pct.ok{color:var(--pri)}.pct.over{color:var(--warn)}.pct.bad{color:var(--danger)}.pct.low{color:#94a3b8}.pct.mid{color:#38bdf8}
+/* 弹层 */
+#mask{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.45);z-index:30;opacity:0;pointer-events:none;transition:opacity .2s}
+#mask.on{opacity:1;pointer-events:auto}
+#sheet{position:fixed;left:0;right:0;bottom:0;max-width:520px;margin:0 auto;background:var(--card);border-radius:18px 18px 0 0;z-index:31;transform:translateY(105%);transition:transform .25s;max-height:88vh;display:flex;flex-direction:column}
+#sheet.on{transform:none}
+#sheet .sh{display:flex;justify-content:space-between;align-items:center;padding:16px 16px 10px;font-weight:700;font-size:17px}
+#sheet .sh .x{padding:6px 10px;color:var(--sub);font-size:20px}
+#sheet .sb{overflow-y:auto;padding:0 16px 18px;-webkit-overflow-scrolling:touch}
+.sfoot{padding:12px 0 4px;border-top:1px solid var(--line);margin-top:8px}
+/* 确认框 */
+#confirm{position:fixed;top:0;right:0;bottom:0;left:0;z-index:40;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45)}
+#confirm.on{display:flex}
+#confirm .cbox{background:var(--card);border-radius:14px;padding:20px;width:min(320px,86vw)}
+#confirm .cbox .row2{margin:16px 0 0}
+/* 提示 */
+#toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:rgba(17,24,39,.9);color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;z-index:50;opacity:0;transition:opacity .2s;pointer-events:none;max-width:86vw;text-align:center}
+#toast.on{opacity:1}
+/* 环形图卡片 */
+.donut-wrap{display:flex;justify-content:center;padding:4px 0}
+.donut-legend{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--sub);margin-top:6px}
+.donut-legend span::before{content:'';display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.sumline{display:flex;gap:10px;flex-wrap:wrap;font-size:14px;color:var(--sub);margin-bottom:12px}
+.sumline b{color:var(--text)}
+/* 子页签 */
+.subtabs{display:flex;background:var(--bar);border-radius:10px;padding:3px;margin-bottom:12px}
+.subtabs button{flex:1;padding:8px;border-radius:8px;font-size:14px;font-weight:600;color:var(--sub)}
+.subtabs button.on{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+/* 日历 */
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cal-head b{font-size:16px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.cal-grid .wd{font-size:12px;color:var(--sub);padding:4px 0}
+.cal-cell{border-radius:8px;padding:4px 0 3px;font-size:13px;position:relative;background:var(--card);border:1px solid var(--line)}
+.cal-cell.out{opacity:.35}
+.cal-cell.cur{border-color:var(--pri)}
+.cal-cell .h{height:5px;border-radius:3px;margin-top:3px;background:transparent}
+.cal-cell .h.low{background:#94a3b8}.cal-cell .h.mid{background:#38bdf8}
+.cal-cell .h.ok{background:var(--pri)}.cal-cell .h.over{background:var(--warn)}
+.cal-cell .dot{position:absolute;top:3px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--info)}
+.cal-legend{display:flex;gap:10px;font-size:12px;color:var(--sub);margin-top:10px;flex-wrap:wrap}
+.cal-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:3px;vertical-align:-1px}
+/* 图表 */
+.chart-box canvas{width:100%;display:block}
+.legend{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.legend .chip.off{opacity:.4}
+.range-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+table.data{width:100%;border-collapse:collapse;font-size:12px}
+table.data th,table.data td{border:1px solid var(--line);padding:5px 4px;text-align:center;white-space:nowrap}
+table.data th{background:var(--bar);position:sticky;top:0}
+.tbl-wrap{overflow:auto;max-height:60vh}
+/* 徽章 */
+.badges{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center}
+.badge{padding:10px 4px;border-radius:12px;border:1px solid var(--line);font-size:12px}
+.badge .ico{font-size:24px;display:block;margin-bottom:4px}
+.badge.got{background:rgba(16,185,129,.12);border-color:var(--pri)}
+.badge:not(.got){opacity:.45}
+/* 其他 */
+.photo-thumb{width:72px;height:72px;border-radius:10px;object-fit:cover;border:1px solid var(--line)}
+.meal-photo{width:100%;max-height:180px;object-fit:cover;border-radius:10px;border:1px solid var(--line);cursor:pointer}
+.photo-strip{display:flex;gap:8px;overflow-x:auto;padding:8px 2px 2px;-webkit-overflow-scrolling:touch}
+.ps-item{position:relative;flex:0 0 auto;width:86px;height:86px}
+.ps-item img{width:86px;height:86px;object-fit:cover;border-radius:10px;border:1px solid var(--line);cursor:pointer;display:block}
+.ps-del{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:var(--danger);color:#fff;font-size:11px;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.photo-view{position:fixed;top:0;right:0;bottom:0;left:0;z-index:45;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center}
+.photo-view.on{display:flex}
+.photo-view img{max-width:94vw;max-height:86vh;border-radius:10px}
+.photo-view .px{position:absolute;top:16px;right:16px;color:#fff;font-size:26px;padding:6px}
+.sec-title{font-weight:700;margin:16px 2px 8px;display:flex;align-items:center;gap:6px}
+.sec-title .right{margin-left:auto;color:var(--pri);font-size:13px;font-weight:600}
+.settings-item{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--line)}
+.settings-item:first-child{border-top:0}
+.settings-item .sval{margin-left:auto;color:var(--sub);font-size:13px}
+.settings-item .arrow{color:var(--sub)}
+.warn-box{background:rgba(245,158,11,.12);border:1px solid var(--warn);color:var(--text);border-radius:10px;padding:10px 12px;font-size:13px;margin:10px 0}
+/* 旧版 Safari（iOS 14.1 以下）不支持 flex 的 gap，用外边距兜底 */
+@supports not (gap:1px){
+  .row>*+*{margin-left:10px}
+  .row2>*+*{margin-left:10px}
+  .chips>*+*{margin-left:8px}
+  .legend>*+*{margin-left:8px}
+  .photo-strip>*+*{margin-left:8px}
+  .cal-grid{grid-gap:4px}
+}
+</style>
+</head>
+<body data-theme="auto">
+<script>
+/* 看门狗（独立脚本块，放在主脚本之前）：1 秒后若 App 仍未初始化，说明主脚本没生效。
+   与底部提示配合可区分两种原因：
+   · 只看到底部提示 → 当前打开方式不执行 JavaScript（如 iOS「文件」快速预览）
+   · 额外看到红色条 → 文件可能在传输/拷贝中被截断，需重新完整拷贝 */
+setTimeout(function(){
+  try{
+    if(document.getElementById('boot')&&typeof renderToday!=='function'){
+      document.getElementById('boot').insertAdjacentHTML('afterbegin',
+        '<div style="background:#b91c1c;color:#fff;padding:10px 12px;border-radius:8px;margin-bottom:12px;font-size:14px;line-height:1.6">'+
+        '<b>脚本解析失败</b><br>文件可能在传输/拷贝过程中被截断或不完整（例如通过聊天软件发送后未能完整保存）。请重新完整拷贝一次本文件，或改用电脑/安卓打开。'+
+        '</div>');
+    }
+  }catch(e){}
+},1000);
+</script>
+<div id="boot"><div style="padding:22px 18px;font-size:15px;line-height:1.75">
+  <b style="font-size:18px;color:#b91c1c">脚本没有运行 —— 当前打开方式不执行 JavaScript</b>
+  <p style="color:#6b7280;margin-top:10px">本 App 的全部内容、计算与记录都由 JavaScript 生成，脚本不执行就没有界面。**文件本身没有问题**（安卓手机、电脑浏览器都能正常打开并长期使用）。</p>
+  <p style="color:#6b7280;margin-top:10px">iOS 的「文件」App 直接点开走的是"快速查看"预览，<b>它不执行 JavaScript</b>，所以会看到这一页；系统共享菜单里通常也不会出现 Safari。</p>
+  <p style="margin-top:14px;font-weight:700">可行的打开方式：</p>
+  <p style="color:#6b7280;margin-top:6px">1. <b>在电脑上打开</b>（最省事）：传到电脑双击用 Chrome / Edge 打开即可使用；数据用「我的→导出 JSON」在设备间搬移。</p>
+  <p style="color:#6b7280;margin-top:6px">2. <b>用带内置浏览器的文件管理 App</b>：例如「Documents」（Readdle，免费），把本文件放进去，用它的浏览器打开（能正常执行脚本）。</p>
+  <p style="color:#6b7280;margin-top:6px">3. <b>安卓手机</b>：用 Chrome 或任意文件管理器打开，功能完整、可离线长期使用。</p>
+  <p style="color:#6b7280;margin-top:6px">4. 如果确实需要在 iPhone 上日常使用，可让开发者把 App 改造成网址形式（需联网打开；本地方式仍可离线用）。</p>
+  <p style="color:#9ca3af;margin-top:14px;font-size:13px">如果你是从微信/QQ 里点开的：先「用其他应用打开」→ 存到「文件」，再参考上面的办法。</p>
+</div></div>
+<header id="datebar">
+  <button id="dbPrev" data-act="dbPrev">‹</button>
+  <button id="dbLabel" data-act="dbLabel">今天</button>
+  <button id="dbNext" data-act="dbNext">›</button>
+  <button id="dbToday" data-act="dbToday">回今天</button>
+</header>
+<main>
+  <noscript><div class="card" style="margin-top:12px"><b>⚠️ 本 App 需要 JavaScript</b><p class="hint">请用浏览器（Safari / Chrome）打开本文件。</p></div></noscript>
+  <section id="pg-today" class="page"></section>
+  <section id="pg-sport" class="page"></section>
+  <section id="pg-data" class="page"></section>
+  <section id="pg-me" class="page"></section>
+</main>
+<nav id="tabbar">
+  <button data-pg="today"><b>🍽️</b><span>今日</span></button>
+  <button data-pg="sport"><b>🏃</b><span>运动</span></button>
+  <button data-pg="data"><b>📈</b><span>数据</span></button>
+  <button data-pg="me"><b>⚙️</b><span>我的</span></button>
+</nav>
+<div id="mask" data-act="closeSheet"></div>
+<div id="sheet"><div class="sh"><span id="shTitle"></span><button class="x" data-act="closeSheet">✕</button></div><div class="sb" id="shBody"></div></div>
+<div id="confirm"><div class="cbox"><div id="cmsg"></div><div class="row2"><button class="btn ghost" data-act="cNo">取消</button><button class="btn danger" data-act="cYes">确定</button></div></div></div>
+<div id="toast"></div>
+<div class="photo-view" id="photoView" data-act="photoClose"><img id="photoImg" alt="照片"><button class="px" data-act="photoClose">✕</button></div>
+<input type="file" id="fileIn" hidden>
+<script>
+/* 第一件事就注册错误显示：之后任何一步出错，用户都能看到具体原因而不是白屏 */
+window.onerror=function(m,s,l,c){showFatal(m+'  ('+l+':'+c+')');return false};
+/* ---------- 全局状态 ---------- */
+let db,cur=todayStr(),curPage='today',selFid=null,pickMeal='breakfast',pickEdit=null,photoData=null,fileMode='',confirmFn=null,photoTarget='body';
+let subTab='body',calY=0,calM=0,trendMode='wb',trendRange='all',trendMA=true,trendTab='chart',girthOn={};
+
+/* ---------- 工具函数 ---------- */
+const $=s=>document.querySelector(s);
+function pad(n){return(n<10?'0':'')+n}
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function addDays(s,n){const y=+s.slice(0,4),m=+s.slice(5,7),d=+s.slice(8,10);const t=new Date(y,m-1,d+n);return t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate())}
+function fmtDate(s){const y=+s.slice(0,4),m=+s.slice(5,7),d=+s.slice(8,10);const wk=['日','一','二','三','四','五','六'][new Date(y,m-1,d).getDay()];return m+'月'+d+'日 周'+wk}
+function n1(x){x=Math.round(x*10)/10;return x===Math.round(x)?String(x):x.toFixed(1)}
+function n2(x){return String(Math.round(x*100)/100)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function num(id){const el=$('#'+id);if(!el)return 0;const v=parseFloat(el.value);return isNaN(v)?0:v}
+function val(id){const el=$('#'+id);return el?String(el.value).trim():''}
+function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('on'),1900)}
+function ask(msg,fn){$('#cmsg').textContent=msg;$('#confirm').classList.add('on');confirmFn=fn}
+let sheetBack=null; // 'plan' = 关闭这个小弹层后回到「今天吃什么」面板（而不是什么都不显示）
+function openSheet(t,h,back){$('#shTitle').textContent=t;$('#shBody').innerHTML=h;$('#sheet').classList.add('on');$('#mask').classList.add('on');document.body.style.overflow='hidden';sheetBack=back||null}
+function closeSheet(){$('#sheet').classList.remove('on');$('#mask').classList.remove('on');document.body.style.overflow='';selFid=null;pickEdit=null;photoData=null}
+function act(a,d,t){if(!ACT[a])return;ACT[a](d,t)}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(t)act(t.dataset.act,t.dataset,t)});
+document.addEventListener('change',e=>{const t=e.target.closest('[data-chg]');if(t&&CHG[t.dataset.chg])CHG[t.dataset.chg](t,e)});
+document.addEventListener('input',e=>{const t=e.target.closest('[data-inp]');if(t&&INP[t.dataset.inp])INP[t.dataset.inp](t,e)});
+
+/* ---------- 存储 ---------- */
+const KEY='fitlog_v1',TABKEY='fitlog_tab';
+function defDb(){return{
+  v:2,
+  profile:{sex:'',age:0,height:0,weight:0,pal:1.5,goal:'gain',surplusPct:10,surplusKcal:400,deficitPct:15,trainOffset:150,proteinPerKg:1.8,fatPct:25,formula:'mifflin',countExercise:true,kcalDefault:'manual',expFactor:0.8},
+  targets:{kcal:null,protein:null,fat:null,carb:null,fiber:null,water:null,micro:{}},
+  microList:[
+    {key:'ca',name:'钙',unit:'mg'},{key:'fe',name:'铁',unit:'mg'},{key:'zn',name:'锌',unit:'mg'},
+    {key:'va',name:'维A',unit:'μg'},{key:'vc',name:'维C',unit:'mg'},{key:'vd',name:'维D',unit:'μg'},
+    {key:'na',name:'钠',unit:'mg',limit:1},{key:'su',name:'添加糖',unit:'g',limit:1},{key:'sf',name:'饱和脂肪',unit:'g',limit:1},{key:'nsu',name:'天然糖',unit:'g'},{key:'h2o',name:'水分',unit:'g'}
+  ],
+  metrics:[{key:'chest',name:'胸围'},{key:'waist',name:'腰围'},{key:'hip',name:'臀围'},{key:'lthigh',name:'左大腿'},{key:'rthigh',name:'右大腿'},{key:'larm',name:'左臂'},{key:'rarm',name:'右臂'}],
+  foods:[],combos:[],logs:{},body:[],
+  settings:{lastExport:'',tab:'today'}
+}}
+function load(){
+  let dirty=false;
+  try{db=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+  if(!db||!db.v){db=defDb();dirty=true}
+  if(db.v===1){ // v1→v2：按用户要求清空食物库、围度换为左右分列（档案与记录保留）
+    db.v=2;db.foods=[];db.metrics=defDb().metrics;dirty=true;
+  }
+  const d=defDb();
+  for(const k in d.profile)if(db.profile[k]===undefined){db.profile[k]=d.profile[k];dirty=true}
+  if(!db.targets){db.targets=d.targets;dirty=true}
+  if(!db.targets.micro){db.targets.micro={};dirty=true}
+  for(const k of ['microList','metrics','foods','combos','logs','body'])if(!db[k]){db[k]=d[k];dirty=true}
+  if(!db.settings){db.settings=d.settings;dirty=true}
+  // 营养素迁移：移除已取消的项（胆固醇），补齐新增项（天然糖/水分）
+  const before=db.microList.length;
+  db.microList=db.microList.filter(m=>m.key!=='chol');
+  if(db.microList.length!==before){delete db.targets.micro.chol;dirty=true}
+  for(const k of ['nsu','h2o'])if(!db.microList.some(m=>m.key===k)){db.microList.push({key:k,name:MICRO_DEF[k].n,unit:MICRO_DEF[k].u});dirty=true}
+  db.metrics.forEach(m=>{if(!m.key){m.key=uid();dirty=true}});
+  if(dirty)save(); // 无变化则不写盘，避免每次打开都重写整库
+}
+function lastTab(){try{return localStorage.getItem(TABKEY)}catch(e){return null}}
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(db))}
+  catch(e){toast('⚠️ 存储空间不足：请到「我的」导出备份后清理旧数据')}
+}
+function ensureLog(d){if(!db.logs[d])db.logs[d]={meals:{breakfast:[],lunch:[],dinner:[],snack:[]},water:0,exercises:[],trainDay:null,photos:{}};if(!db.logs[d].photos)db.logs[d].photos={};return db.logs[d]}
+/* 每餐可存多张照片：photos[餐次] 为数组；旧数据是单张字符串，读取时自动升级为数组 */
+function photosOf(log,k){
+  if(!log||!log.photos)return[];
+  const v=log.photos[k];
+  if(!v)return[];
+  if(typeof v==='string'){log.photos[k]=[v];return log.photos[k]}
+  return v;
+}
+const MEAL_PHOTO_MAX=48,MEAL_PHOTO_PER=9; // 总上限 48 张、每餐最多 9 张（照片占用存储，需设限）
+function mealPhotoCount(){let n=0;for(const d in db.logs){const ph=db.logs[d].photos;if(ph)for(const k in ph)n+=photosOf(db.logs[d],k).length}return n}
+function setMealPhoto(mk,list){
+  const log=ensureLog(cur),arr=photosOf(log,mk);
+  const add=Array.isArray(list)?list:[list];
+  for(const data of add){
+    arr.push(data);
+    if(arr.length>MEAL_PHOTO_PER)arr.shift(); // 每餐只留最近 9 张
+  }
+  log.photos[mk]=arr;
+  let pruned=0;
+  while(mealPhotoCount()>MEAL_PHOTO_MAX){
+    const dates=Object.keys(db.logs).filter(d=>db.logs[d].photos).sort();
+    let done=false;
+    for(const d of dates){
+      for(const k of ['breakfast','lunch','dinner','snack']){
+        if(d===cur&&k===mk)continue; // 不删刚存的这一餐
+        const a=photosOf(db.logs[d],k);
+        if(a.length){a.shift();pruned++;done=true;break}
+      }
+      if(done)break;
+    }
+    if(!done)break;
+  }
+  save();refresh();
+  toast(pruned?`📷 已保存 ${add.length} 张（超出 ${MEAL_PHOTO_MAX} 张上限，自动删除最早 ${pruned} 张）`:`📷 已保存 ${add.length} 张餐照`);
+}
+function getLog(d){return db.logs[d]||null}
+
+/* 食物库按用户要求清空，全部食物由用户手动录入或 TXT 导入 */
+
+/* ---------- 运动 MET 参考表（可改） ---------- */
+const METS=[['力量训练(一般)',3.5],['力量训练(大重量)',6],['快走(5.5km/h)',4.3],['慢跑',7],['跑步(8km/h)',8],['跑步(10km/h)',9.8],['骑行(通勤)',6.8],['跳绳(中速)',11],['游泳(自由泳)',6],['羽毛球',5.5],['瑜伽',2.5],['爬楼梯',8],['舞蹈',4.5],['椭圆机',5]];
+
+/* ---------- 营养素定义（中国DRIs 2023 成人：a=[男,女] RNI/AI；lim=静态上限；dyn=按能量%动态；info=仅记录） ---------- */
+const KJ=4.2; // 千焦换算系数，采用中国国标 GB 28050 的 1kcal=4.2kJ（附录：8400kJ=2000kcal）
+const MICRO_DEF={
+  ca:{n:'钙',u:'mg',a:[800,800]},
+  fe:{n:'铁',u:'mg',a:[12,18]},
+  zn:{n:'锌',u:'mg',a:[12,8.5]},
+  va:{n:'维生素A',u:'μgRAE',a:[770,660]},
+  vc:{n:'维生素C',u:'mg',a:[100,100]},
+  vd:{n:'维生素D',u:'μg',a:[10,10]},
+  na:{n:'钠',u:'mg',lim:2000},
+  su:{n:'添加糖',u:'g',lim:25,min:1},
+  nsu:{n:'天然糖',u:'g',info:1},
+  h2o:{n:'水分',u:'g',info:1},
+  sf:{n:'饱和脂肪',u:'g',dyn:10},
+  mufa:{n:'单不饱和脂肪',u:'g',info:1},
+  pufa:{n:'多不饱和脂肪',u:'g',info:1},
+  tfa:{n:'反式脂肪',u:'g',dyn:1,min:1},
+  ve:{n:'维生素E',u:'mg',a:[14,14]},
+  vk:{n:'维生素K',u:'μg',a:[80,80]},
+  vb1:{n:'维生素B1',u:'mg',a:[1.4,1.2]},
+  vb2:{n:'维生素B2',u:'mg',a:[1.4,1.2]},
+  vb6:{n:'维生素B6',u:'mg',a:[1.4,1.4]},
+  vb12:{n:'维生素B12',u:'μg',a:[2.4,2.4]},
+  b3:{n:'烟酸',u:'mgNE',a:[15,12]},
+  b5:{n:'泛酸',u:'mg',a:[5,5]},
+  bio:{n:'生物素',u:'μg',a:[40,40]},
+  fa:{n:'叶酸',u:'μgDFE',a:[400,400]},
+  cho:{n:'胆碱',u:'mg',a:[450,380]},
+  mg:{n:'镁',u:'mg',a:[330,330]},
+  k:{n:'钾',u:'mg',a:[2000,2000]},
+  pho:{n:'磷',u:'mg',a:[720,720]},
+  cu:{n:'铜',u:'mg',a:[0.8,0.8]},
+  mn:{n:'锰',u:'mg',a:[4.5,4.0]},
+  se:{n:'硒',u:'μg',a:[60,60]},
+  i:{n:'碘',u:'μg',a:[120,120]},
+  cr:{n:'铬',u:'μg',a:[35,30]},
+  mo:{n:'钼',u:'μg',a:[25,25]},
+  fl:{n:'氟',u:'mg',a:[1.5,1.5]}
+};
+const MICRO_DEFAULT_KEYS=['ca','fe','zn','va','vc','vd','na','su','sf','nsu','h2o'];
+const EXTRA_MICROS=Object.entries(MICRO_DEF).filter(([k])=>!MICRO_DEFAULT_KEYS.includes(k)).map(([key,v])=>({key,name:v.n,unit:v.u,limit:!!(v.lim!=null||v.dyn),min:!!v.min,info:!!v.info}));
+
+/* ---------- 公式 ---------- */
+function calcT(){
+  const pf=db.profile;
+  const b1=10*pf.weight+6.25*pf.height-5*pf.age+(pf.sex==='m'?5:-161);
+  const b2=pf.sex==='m'?15.057*pf.weight+692.2:14.818*pf.weight+486.6;
+  const bmr=pf.formula==='fao'?b2:b1,tdeeRaw=bmr*pf.pal,exp=pf.expFactor==null?1:pf.expFactor,tdee=tdeeRaw*exp;
+  let base=pf.goal==='cut'?tdee*(1-pf.deficitPct/100):pf.goal==='maintain'?tdee:(pf.surplusMode==='kcal'?tdee+pf.surplusKcal:tdee*(1+pf.surplusPct/100));
+  const t=db.targets,baseK=t.kcal!=null?+t.kcal:base,pG=pf.weight*pf.proteinPerKg,autoW=pf.sex==='m'?1700:1500;
+  return{
+    bmr:Math.round(bmr),tdee:Math.round(tdee),tdeeRaw:Math.round(tdeeRaw),exp,
+    kcal:t.kcal!=null?+t.kcal:Math.round(base),
+    protein:t.protein!=null?+t.protein:+pG.toFixed(1),
+    fat:t.fat!=null?+t.fat:+(baseK*pf.fatPct/100/9).toFixed(1),
+    carb:t.carb!=null?+t.carb:+Math.max(0,(baseK-pG*4-baseK*pf.fatPct/100)/4).toFixed(1),
+    fiber:t.fiber!=null?+t.fiber:25,
+    water:t.water!=null?+t.water:autoW,
+    // 哪些项目被手动覆盖（覆盖后改档案/盈余都不会影响该项，界面需明确提示）
+    ov:{kcal:t.kcal!=null,protein:t.protein!=null,fat:t.fat!=null,carb:t.carb!=null,fiber:t.fiber!=null,water:t.water!=null},
+    // 完全按公式算（不含任何覆盖）的值，用于对照显示
+    auto:{kcal:Math.round(base),protein:+pG.toFixed(1),fat:+(base*pf.fatPct/100/9).toFixed(1),carb:+Math.max(0,(base-pG*4-base*pf.fatPct/100)/4).toFixed(1),fiber:25,water:autoW}
+  };
+}
+function microDef(kcal){
+  const pf=db.profile,t=db.targets;
+  const out={};
+  for(const m of db.microList){
+    const def=MICRO_DEF[m.key];
+    if(!def||def.info)continue;
+    if(t.micro[m.key]!=null&&t.micro[m.key]!=='')out[m.key]=+t.micro[m.key];
+    else if(def.lim!=null)out[m.key]=def.lim;
+    else if(def.dyn)out[m.key]=+(kcal*def.dyn/100/9).toFixed(1);
+    else out[m.key]=def.a[pf.sex==='m'?0:1];
+  }
+  return out;
+}
+function dayTarget(date){
+  const c=calcT(),log=getLog(date);
+  const train=(log&&log.trainDay!=null)?log.trainDay:!!(log&&log.exercises.length);
+  if(train)c.kcal+=db.profile.trainOffset;
+  if(log&&log.exercises.length)c.water+=500;
+  c.train=train;c.micro=microDef(c.kcal);return c;
+}
+function sumDay(date){
+  const log=getLog(date);
+  const s={kcal:0,p:0,f:0,c:0,fib:0,micro:{},ex:0,water:log?log.water:0,vol:0,exCnt:log?log.exercises.length:0};
+  if(log){
+    for(const k in log.meals)for(const it of log.meals[k]){
+      if(!it.boil){s.kcal+=it.kcal;s.p+=it.p;s.f+=it.f;s.c+=it.c;s.fib+=it.fib} // 水煮项：不计热量与三大营养素，仅计微量与水分
+      for(const mk in it.micro)s.micro[mk]=(s.micro[mk]||0)+it.micro[mk];
+    }
+    for(const e of log.exercises){s.ex+=e.kcal;if(e.sets&&e.reps&&e.weight)s.vol+=e.sets*e.reps*e.weight}
+  }
+  return s;
+}
+function foodNutr(f,g){const k=g/(f.baseG||100);return{kcal:Math.round(f.kcal*k*10)/10,p:+(f.p*k).toFixed(1),f:+(f.f*k).toFixed(1),c:+(f.c*k).toFixed(1),fib:+(f.fib*k).toFixed(1),micro:Object.fromEntries(Object.entries(f.micro||{}).filter(([k2,v])=>v!=null).map(([k2,v])=>[k2,+(v*k).toFixed(1)]))}}
+function foodById(id){return db.foods.find(x=>x.id===id)}
+/* 库存：记录食物时自动扣减（未设置库存的食物不参与扣减） */
+function deductStock(fid,grams){
+  const f=foodById(fid);
+  if(!f||f.stock==null||!(grams>0))return;
+  f.stock=Math.max(0,+(f.stock-grams).toFixed(1));
+}
+function stockText(f){
+  if(f.stock==null)return n1(0)+'g';
+  const u=f.stockUnit&&f.stockUnit!=='克'?f.stockUnit:null;
+  const ug=u?planUnitG(f,u):0;
+  return n1(f.stock)+'g'+(u&&ug>0?`（≈${n1(f.stock/ug)}${u}）`:'');
+}
+function stockLabel(f){return f.stock==null?'':'　库存 '+stockText(f)}
+/* 单餐上限的显示：按用户填写的单位回显（如 100g（≈2个）） */
+function capText(f){
+  const c=planCapOf(f);
+  const u=f.mealUnit&&f.mealUnit!=='克'?f.mealUnit:null,ug=u?planUnitG(f,u):0;
+  return (u&&ug>0)?`${n1(c.M)}g（≈${n1(c.M/ug)}${u}）`:`${n1(c.M)}g`;
+}
+/* 单日上限的显示：一天内这种食物累计最多纳入多少（不限时显示"不限"） */
+function dayText(f){
+  const D=planDayOf(f);
+  if(!(D>0))return'不限';
+  const u=f.dayUnit&&f.dayUnit!=='克'?f.dayUnit:null,ug=u?planUnitG(f,u):0;
+  return (u&&ug>0)?`${n1(D)}g（≈${n1(D/ug)}${u}）`:`${n1(D)}g`;
+}
+
+/* ---------- 页面切换 / 日期 ---------- */
+function renderDatebar(){
+  const isT=cur===todayStr();
+  $('#dbLabel').textContent=(isT?'今天 · ':'')+fmtDate(cur);
+  $('#dbToday').style.display=isT?'none':'block';
+  renderDatebar.cur=cur;
+}
+function setCur(s){cur=s;renderDatebar();refresh()}
+function refresh(){const R={today:renderToday,sport:renderSport,data:renderData,me:renderMe};R[curPage]()}
+function go(pg){
+  curPage=pg;
+  try{localStorage.setItem(TABKEY,pg)}catch(e){} // 只写这个极小键，不重写整库（含照片时很贵）
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on',p.id==='pg-'+pg));
+  document.querySelectorAll('#tabbar button').forEach(b=>b.classList.toggle('on',b.dataset.pg===pg));
+  $('#datebar').style.display=(pg==='data'||pg==='me')?'none':'flex';
+  refresh();window.scrollTo(0,0);
+}
+/* ---------- 进度条与通用渲染 ---------- */
+const MEAL_NAMES={breakfast:'早餐',lunch:'午餐',dinner:'晚餐',snack:'加餐'};
+function pctCls(pct,mode){
+  if(mode===2)return pct<=0.01?'ok':(pct<=100?'over':'bad'); // 越低越好：0=绿，有摄入=橙，超=红
+  if(mode===1)return pct<=100?'ok':'bad';
+  if(pct<50)return'low';if(pct<90)return'mid';if(pct<=110)return'ok';return'over';
+}
+function barRow(name,cur,tgt,unit,mode,key){
+  const pct=tgt>0?cur/tgt*100:0,cls=pctCls(pct,mode),w=Math.min(100,pct);
+  return`<div class="prow"${key?` data-act="nutriBreak" data-key="${key}"`:''}${key?' style="cursor:pointer"':''}><div class="pt"><span>${name}${key?' <span style="color:var(--sub);font-size:11px">▸</span>':''}</span><span class="pv">${n1(cur)} / ${n1(tgt)} ${unit}</span><span class="pct ${cls}">${tgt>0?Math.round(pct)+'%':'—'}</span></div><div class="bar"><i class="${cls}" style="width:${w}%"></i></div></div>`;
+}
+function streak(){
+  const has=d=>{const l=getLog(d);return!!(l&&(l.meals.breakfast.length||l.meals.lunch.length||l.meals.dinner.length||l.meals.snack.length))};
+  let n=0,d=todayStr();
+  if(!has(d))d=addDays(d,-1);
+  while(has(d)){n++;d=addDays(d,-1)}
+  return n;
+}
+function badges(){
+  const days=Object.keys(db.logs).filter(d=>{const l=db.logs[d];return l.meals.breakfast.length||l.meals.lunch.length||l.meals.dinner.length||l.meals.snack.length});
+  const exDays=Object.keys(db.logs).filter(d=>db.logs[d].exercises.length).length;
+  const st=streak();
+  return[
+    ['🌟','首次记录',days.length>=1],['🔥','连续打卡 7 天',st>=7],['💪','连续打卡 30 天',st>=30],['🏆','连续打卡 100 天',st>=100],
+    ['📅','累计记录 30 天',days.length>=30],['📚','累计记录 100 天',days.length>=100],
+    ['📏','体测满 12 次',db.body.length>=12],['🏃','累计训练 50 天',exDays>=50]];
+}
+function waterBar(s,t){
+  const food=+(s.micro.h2o||0),total=s.water+food,pct=t.water>0?total/t.water*100:0,cls=pctCls(pct);
+  const w1=Math.min(100,t.water>0?s.water/t.water*100:0);
+  const w2=Math.max(0,Math.min(100-w1,t.water>0?food/t.water*100:0));
+  return `<div class="prow"><div class="pt"><span>饮水</span><span class="pv">打卡 ${n1(s.water)} + 食物 ${n1(food)} = <b>${n1(total)}</b> / ${n1(t.water)} ml</span><span class="pct ${cls}">${t.water>0?Math.round(pct)+'%':'—'}</span></div>
+  <div class="bar" style="display:flex"><i style="width:${w1}%;background:var(--pri);border-radius:0"></i><i style="width:${w2}%;background:var(--cFib);border-radius:0"></i></div>
+  <div class="hint" style="margin-top:4px"><span style="color:var(--pri)">■</span> 打卡喝水 <span style="color:var(--cFib)">■</span> 食物水分（两者相加计入饮水目标；1g 食物水 ≈ 1ml）</div></div>`;
+}
+/* 缺口推荐：一张卡同时列出三项缺口，每项食物同时显示三大营养素 */
+function renderGapCard(t,s){
+  if(cur<todayStr())return'';
+  const defs=[{k:'p',n:'蛋白质',c:'var(--cP)',v:t.protein-s.p,min:10},{k:'f',n:'脂肪',c:'var(--cF)',v:t.fat-s.f,min:8},{k:'c',n:'碳水',c:'var(--cC)',v:t.carb-s.c,min:20}];
+  const need=defs.filter(x=>x.v>x.min);
+  if(!need.length)return'';
+  const picks=[];
+  for(const g of need){
+    const dens={p:10,f:8,c:20}[g.k];
+    const best=db.foods.slice().filter(x=>(x[g.k]||0)>=dens).sort((a,b)=>(b[g.k]||0)-(a[g.k]||0))[0];
+    if(!best)continue;
+    const u=(best.units||[{name:'g',g:1}]).find(x=>x.g>=30)||{name:'g',g:1};
+    const cnt=Math.max(1,Math.ceil(g.v/best[g.k]*100/u.g));
+    const ex=picks.find(x=>x.f.id===best.id);
+    if(ex){ex.tags.push(g.n);if(cnt*u.g>ex.cnt*ex.u.g){ex.cnt=cnt;ex.u=u}}
+    else picks.push({f:best,u,cnt,tags:[g.n]});
+  }
+  let html=`<div class="card"><div class="mhead"><span>🎯 还差这些，可以这样补</span></div>
+  <div class="chips" style="margin-bottom:8px">${need.map(g=>`<span class="chip" style="pointer-events:none">${g.n} <b style="color:${g.c}">${n1(g.v)}g</b></span>`).join('')}</div>`;
+  html+=picks.length?picks.map(pk=>{
+    const g=+(pk.cnt*pk.u.g).toFixed(1),n=foodNutr(pk.f,g);
+    const amt=pk.u.name==='g'?`${n1(g)}g`:`${pk.cnt}${esc(pk.u.name)}（${n1(g)}g）`;
+    return`<div class="item"><div class="grow"><div class="iname">${esc(pk.f.name)} ${amt}<span style="font-size:12px;color:var(--sub);font-weight:400"> 补${pk.tags.join('+')}</span></div>
+    <div class="isub">蛋白 <b style="color:var(--cP)">${n1(n.p)}</b> · 脂肪 <b style="color:var(--cF)">${n1(n.f)}</b> · 碳水 <b style="color:var(--cC)">${n1(n.c)}</b> · ${Math.round(n.kcal)} kcal</div></div>
+    <button class="addbtn plain" data-act="gapAdd" data-fid="${pk.f.id}" data-qty="${pk.cnt}" data-unit="${esc(pk.u.name)}">＋</button></div>`;
+  }).join(''):'<div class="empty">食物库里还没有合适的食物，先去添加</div>';
+  return html+`<div class="hint">每项份量是按单独补足对应缺口算的，任选其一即可；三项都吃会超出热量目标。名称后标注的是它主要补的营养素，下面同时列出三大营养素供参考。</div></div>`;
+}
+
+/* ---------- 今日页 ---------- */
+let microOpen=false;
+function renderToday(){
+  if(!db.profile.sex){$('#pg-today').innerHTML=`<div class="card center" style="padding:36px 20px"><div style="font-size:44px">👋</div><p style="margin:10px 0;color:var(--sub)">首次使用，请先完善个人档案<br>App 会自动计算你的每日营养目标</p><button class="btn" data-act="editProfile">去填写档案</button></div>`;return}
+  const s=sumDay(cur),t=dayTarget(cur);
+  const left=t.kcal+(db.profile.countExercise?s.ex:0)-s.kcal;
+  const log=getLog(cur);
+  const train=(log&&log.trainDay!=null)?log.trainDay:!!(log&&log.exercises.length);
+  const st=streak();
+  let html='';
+  html+=`<div class="row2" style="margin-bottom:12px">
+    <div class="card" style="flex:1;margin:0;padding:10px;text-align:center"><div style="font-size:20px">🔥</div><div style="font-size:12px;color:var(--sub)">连续打卡</div><b>${st} 天</b></div>
+    <div class="card" style="flex:2;margin:0;padding:10px"><div style="font-size:12px;color:var(--sub);margin-bottom:6px">今天 · 目标模式</div><div class="chips">
+      <button class="chip ${train?'':'on'}" data-act="trainToggle" data-mode="rest">😴 休息日</button>
+      <button class="chip ${train?'on':''}" data-act="trainToggle" data-mode="train">🏋️ 训练日</button>
+      <button class="chip ${log&&log.trainDay!=null?'on':''}" data-act="trainToggle" data-mode="auto">自动</button>
+    </div></div></div>`;
+  html+=`<div class="card"><div class="donut-wrap"><canvas id="cvDonut"></canvas></div>
+    <div class="center" style="font-size:13px;color:var(--sub)">目标 <b class="num">${n1(t.kcal)}</b> kcal${t.ov.kcal?'<b style="color:var(--warn)">（手动锁定）</b>':''} / <b class="num">${Math.round(t.kcal*KJ)}</b> kJ · 已摄入 <b class="num">${n1(s.kcal)}</b> kcal · 运动 <b class="num">${n1(s.ex)}</b>${t.train?` · 训练日 +${n1(db.profile.trainOffset)}`:''}</div>
+    ${t.ov.kcal?`<div class="hint center">ℹ️ 热量目标已被手动锁定为 ${n1(db.targets.kcal)} kcal（按公式算为 ${n1(t.auto.kcal)} kcal）。改档案或盈余比例不会影响它，需要改请到「我的→目标设置→覆盖单个营养目标」调整或恢复自动。</div>`:''}
+    ${t.exp!==1?`<div class="hint center">估算口径：TDEE ${n1(t.tdeeRaw)} kcal（PAL ${n2(db.profile.pal)}）× 经验修正系数 ${n2(t.exp)} = ${n1(t.tdee)} kcal，再${db.profile.goal==='gain'?'加盈余':db.profile.goal==='cut'?'减缺口':'维持'}所得</div>`:''}
+    <div class="donut-legend"><span style="color:var(--cP)">蛋白 ${n1(s.p)}g</span><span style="color:var(--cF)">脂肪 ${n1(s.f)}g</span><span style="color:var(--cC)">碳水 ${n1(s.c)}g</span></div></div>`;
+  html+=`<div class="card">${barRow('热量',s.kcal,t.kcal,'kcal',0,'kcal')}${barRow('蛋白质',s.p,t.protein,'g',0,'p')}${barRow('脂肪',s.f,t.fat,'g',0,'f')}${barRow('碳水',s.c,t.carb,'g',0,'c')}${barRow('膳食纤维',s.fib,t.fiber,'g',0,'fib')}<div class="hint">👆 点任意一行，看今天各食物对这个目标的贡献</div></div>`;
+  html+=renderMealsHTML();
+  html+=renderGapCard(t,s);
+  html+=`<div class="card"><div class="mhead"><span>💧 饮水</span><span class="mcal">目标 ${n1(t.water)} ml</span></div>${waterBar(s,t)}
+    <div class="hint">时段建议：上午 ${Math.round(t.water*0.4)} ml · 下午 ${Math.round(t.water*0.35)} ml · 晚上 ${Math.round(t.water*0.25)} ml${t.water>calcT().water?'（运动日 +500）':''}</div>
+    <div class="chips" style="margin-top:10px"><button class="chip" data-act="waterAdd" data-ml="200">+200</button><button class="chip" data-act="waterAdd" data-ml="300">+300</button><button class="chip" data-act="waterAdd" data-ml="500">+500</button><button class="chip" data-act="waterAdd" data-ml="custom">自定义</button><button class="chip" data-act="waterAdd" data-ml="-200">撤销</button></div></div>`;
+  let microHtml=`<div class="mhead"><span>🧪 微量元素</span><span class="mcal">${microOpen?'收起 ▲':'展开 ▼'}</span></div>`;
+  if(microOpen){
+    const over=db.microList.filter(m=>{const def=MICRO_DEF[m.key];return (m.limit||(def&&def.min))&&(s.micro[m.key]||0)>(t.micro[m.key]||0)}).map(m=>m.name);
+    if(over.length)microHtml+=`<div class="warn-box">⚠️ 今日超标：${over.join('、')}</div>`;
+    microHtml+=db.microList.map(m=>{
+      const def=MICRO_DEF[m.key];
+      if(def&&def.info)return `<div class="prow" data-act="nutriBreak" data-key="${m.key}" style="cursor:pointer"><div class="pt"><span>${m.name} <span style="color:var(--sub);font-size:11px">▸</span></span><span class="pv">${s.micro[m.key]!=null?n1(s.micro[m.key]):'—'} ${m.unit}${m.key==='h2o'?' · 已计入上方饮水':''}</span><span class="pct" style="color:var(--sub)">仅记录</span></div></div>`;
+      return barRow(m.name,s.micro[m.key]!=null?s.micro[m.key]:0,t.micro[m.key]!=null?t.micro[m.key]:0,m.unit,(def&&def.min)?2:(m.limit?1:0),m.key);
+    }).join('');
+    microHtml+=`<div class="hint">上限型：未超=绿、超=红；「越低越好」（添加糖/反式脂肪）：0=绿、有摄入=橙、超=红。食物未填写的微量不参与统计。</div>`;
+  }else{
+    const ms=db.microList.map(m=>`${m.name} ${s.micro[m.key]!=null?n1(s.micro[m.key])+'/'+n1(t.micro[m.key]):'—'}`).join(' · ');
+    microHtml+=`<div class="hint">${ms}</div>`;
+  }
+  html+=`<div class="card" data-act="toggleMicro">${microHtml}</div>`;
+  $('#pg-today').innerHTML=html;
+  requestAnimationFrame(drawDonut); // 延后到下一帧：先让文字内容完成布局并绘制，避免读 clientWidth 触发整页强制同步布局
+}
+
+/* ---------- 今日饮食列表（并入今日页） ---------- */
+function renderMealsHTML(){
+  const log=getLog(cur);
+  let html=`<div class="sec-title">🍽️ 今天吃了什么</div>`;
+  for(const k of ['breakfast','lunch','dinner','snack']){
+    const list=(log&&log.meals[k])||[];
+    const kk=list.reduce((a,i)=>a+(i.boil?0:i.kcal),0);
+    const ph=photosOf(log,k);
+    html+=`<div class="card"><div class="mhead"><span data-act="mealBreak" data-meal="${k}" style="cursor:pointer">${MEAL_ICON[k]} ${MEAL_NAMES[k]} <span style="color:var(--sub);font-size:11px">▸</span></span><span class="mcal" data-act="mealBreak" data-meal="${k}" style="cursor:pointer">${n1(kk)} kcal</span><button class="addbtn plain" data-act="mealPhoto" data-meal="${k}" title="拍/传餐照（可多选）">📷</button><button class="addbtn" data-act="pick" data-meal="${k}">＋</button></div>`;
+    if(ph.length)html+=`<div class="photo-strip">${ph.map((src,i)=>`<div class="ps-item"><img data-act="photoShow" src="${src}" alt="餐照"><button class="ps-del" data-act="mealPhotoDel" data-meal="${k}" data-i="${i}">✕</button></div>`).join('')}</div>`;
+    html+=list.length?list.map((i,idx)=>`<div class="item" data-act="editItem" data-meal="${k}" data-idx="${idx}"><div class="grow"><div class="iname">${esc(i.name)}${i.boil?' <span style="color:var(--cFib);font-size:12px">🍲水煮</span>':''}</div><div class="isub">${i.unit==='g'?n1(i.g)+'g':n1(i.qty)+' '+esc(i.unit)+'（'+n1(i.g)+'g）'} · 蛋白 ${n1(i.p)}g</div></div><div class="ival">${i.boil?'<span style="color:var(--cFib)">不计</span>':n1(i.kcal)+' kcal'}</div></div>`).join(''):`<div class="empty">还没有记录</div>`;
+    html+=`</div>`;
+  }
+  if(db.combos.length)html+=`<div class="card"><div class="mhead"><span>🍱 餐组合（一键添加整餐）</span></div><div class="chips">${db.combos.map(c=>`<button class="chip" data-act="comboAdd" data-id="${c.id}">${esc(c.name)}</button>`).join('')}</div></div>`;
+  html+=`<button class="btn" data-act="openPlan" style="margin-bottom:10px">🍽️ 今天吃什么（帮我分到三餐）</button>`;
+  html+=`<div class="row2"><button class="btn ghost" data-act="copyYesterday">📋 复制昨天的早餐</button><button class="btn ghost" data-act="openLib">📖 食物库</button></div>`;
+  return html;
+}
+
+/* ---------- 运动页 ---------- */
+function renderSport(){
+  const s=sumDay(cur),log=getLog(cur);
+  let html=`<div class="sumline"><span>消耗 <b>${n1(s.ex)}</b> kcal</span><span>容量 <b>${n1(s.vol)}</b> kg</span><span>运动 ${s.exCnt} 次</span></div>`;
+  if(log&&log.exercises.length){
+    html+=`<div class="card">`+log.exercises.map((e,i)=>`<div class="item"><div class="grow"><div class="iname">${esc(e.name)}</div><div class="isub">${n1(e.min)} 分钟 · ${n1(e.met)} MET${e.sets&&e.reps&&e.weight?` · ${e.sets}组×${e.reps}次×${n1(e.weight)}kg = ${n1(e.sets*e.reps*e.weight)} kg`:''}</div></div><div class="ival">${n1(e.kcal)} kcal</div><button class="del" data-act="editEx" data-idx="${i}">编辑</button><button class="del" data-act="delEx" data-idx="${i}">✕</button></div>`).join('')+`</div>`;
+  }else html+=`<div class="card empty">今天还没有运动记录</div>`;
+  html+=`<button class="btn" data-act="addEx">＋ 添加运动</button>`;
+  html+=`<div class="hint center" style="margin-top:10px">${db.profile.countExercise?'✅ 运动消耗已计入「还可以吃」（我的→目标设置 可关闭）':'➖ 运动消耗不计入「还可以吃」（我的→目标设置 可开启）'}</div>`;
+  $('#pg-sport').innerHTML=html;
+}
+
+/* ---------- 食物选择器 ---------- */
+let pickCat='all',pickQtyHold=1,pickEditIdx=null,pickBoil=false,pickSort='def';
+function openPicker(meal,fid,qty,unit,editIdx){
+  pickMeal=meal;selFid=fid||null;pickEdit=editIdx!=null?{idx:editIdx}:null;pickBoil=false;
+  const html=`<select id="pickMealSel" data-chg="pickMealChg" style="margin-bottom:8px">${Object.keys(MEAL_NAMES).map(k=>`<option value="${k}" ${k===meal?'selected':''}>${MEAL_NAMES[k]}</option>`).join('')}</select>
+  <input id="pickQ" placeholder="🔍 搜索食物名称" data-inp="pickQ">
+  <div class="chips" style="margin:10px 0"><button class="chip ${pickCat==='all'?'on':''}" data-act="pickCat" data-c="all">全部</button><button class="chip ${pickCat==='fav'?'on':''}" data-act="pickCat" data-c="fav">⭐常吃</button><button class="chip ${pickCat==='sup'?'on':''}" data-act="pickCat" data-c="sup">💊补剂</button></div>
+  <div class="chips" style="margin-bottom:8px">${[['def','默认'],['p','蛋白↓'],['f','脂肪↓'],['c','碳水↓']].map(x=>`<button class="chip ${pickSort===x[0]?'on':''}" data-act="pickSort" data-s="${x[0]}">${x[1]}</button>`).join('')}</div>
+  <div id="pickList" style="max-height:36vh;overflow-y:auto"></div>
+  <div class="sfoot" id="pickSelBox"></div>`;
+  openSheet('选择食物',html);
+  renderPickList('');
+  renderPickSel(qty,unit);
+}
+function renderPickList(q){
+  q=(q||'').trim();
+  let list=db.foods.slice();
+  if(pickCat==='fav')list=list.filter(f=>f.fav);
+  if(pickCat==='sup')list=list.filter(f=>f.cat==='sup');
+  if(q)list=list.filter(f=>f.name.includes(q));
+  // 按所选营养素含量（每克密度，兼容不同基准的食物）从高到低排；默认按"常吃 → 使用次数 → 最近使用"
+  const per=(f,k)=>f[k]/(f.baseG||100);
+  if(pickSort==='p')list.sort((a,b)=>per(b,'p')-per(a,'p'));
+  else if(pickSort==='f')list.sort((a,b)=>per(b,'f')-per(a,'f'));
+  else if(pickSort==='c')list.sort((a,b)=>per(b,'c')-per(a,'c'));
+  else list.sort((a,b)=>(b.fav||0)-(a.fav||0)||(b.used||0)-(a.used||0)||(b.last||'').localeCompare(a.last||''));
+  const key={def:null,p:'p',f:'f',c:'c'}[pickSort],label={p:'蛋白',f:'脂肪',c:'碳水'}[key];
+  $('#pickList').innerHTML=list.slice(0,80).map(f=>{
+    const b=f.baseG||100;
+    const hl=key?` · <b style="color:${key==='p'?'var(--cP)':key==='f'?'var(--cF)':'var(--cC)'}">${label} ${n1(f[key]*100/b)}g/100g当量</b>`:'';
+    return`<div class="item"><div class="grow" data-act="pickSel" data-fid="${f.id}"><div class="iname">${f.fav?'⭐ ':''}${esc(f.name)}${hl}</div><div class="isub">${baseLabel(f)}：${n1(f.kcal)} kcal · 蛋白 ${n1(f.p)} · 脂肪 ${n1(f.f)} · 碳水 ${n1(f.c)}${f.cat==='sup'?' · 💊补剂':''}</div></div><button class="addbtn plain" data-act="pickQuick" data-fid="${f.id}">＋</button></div>`;
+  }).join('')||`<div class="empty">没有匹配的食物，去「我的 → 食物库」添加</div>`;
+}
+function renderPickSel(qty,unit){
+  const box=$('#pickSelBox');if(!box)return;
+  const f=selFid?foodById(selFid):null;
+  if(!f){box.innerHTML='<div class="hint">👆 点上方食物选择，或点 ＋ 按常用份量快速添加</div>';return}
+  const units=f.units&&f.units.length?f.units:[{name:'g',g:1}];
+  const u=(unit?units.find(x=>x.name===unit):null)||units.find(x=>x.name===f.lastUnit)||units[0];
+  const g=+(qty!=null?qty*u.g:u.g).toFixed(1);
+  const n=foodNutr(f,g);
+  box.innerHTML=`<div style="font-weight:700;margin-bottom:8px">${f.fav?'⭐ ':''}${esc(f.name)}</div>
+  <div class="row"><input id="pickQty" type="number" inputmode="decimal" min="0" value="${qty!=null?qty:1}" data-inp="pickSelPrev"><select id="pickUnit" data-chg="pickSelPrev">${units.map(x=>`<option ${x.name===u.name?'selected':''}>${esc(x.name)}</option>`).join('')}</select><button class="chip" style="flex:0 0 auto" data-act="pickNewUnit">＋单位</button></div>
+  <div class="hint" id="pickPrevHint">≈ ${n1(g)} g · 热量 ${n1(n.kcal)} kcal（${Math.round(n.kcal*KJ)} kJ）· 蛋白 ${n1(n.p)} · 脂肪 ${n1(n.f)} · 碳水 ${n1(n.c)} · 纤维 ${n1(n.fib)}</div>
+  <div class="chips" style="margin-top:8px"><button class="chip ${pickBoil?'on':''}" data-act="pickBoil">🍲 水煮（不计热量与营养素）</button></div>
+  <div class="hint">${pickBoil?'✅ 本条按水煮处理：不计热量、蛋白质、脂肪、碳水、纤维，仅计入微量营养素与水分':'用于水煮蔬菜等：勾选后本条既不占热量额度，也不计三大营养素（微量营养素与水分照常记录）'}</div>
+  <button class="btn" style="margin-top:10px" data-act="pickAdd">${pickEdit?'保存修改':'添加到 '+MEAL_NAMES[pickMeal]}</button>
+  <button class="btn ghost" style="margin-top:8px" data-act="editSelFood">✏️ 编辑该食物（营养/单位）</button>
+  ${pickEdit?`<button class="btn danger" style="margin-top:8px" data-act="pickDel">删除这条记录</button>`:''}`;
+}
+function pushItem(item){
+  const log=ensureLog(cur),list=log.meals[pickMeal];
+  if(pickEdit!=null)list[pickEdit.idx]=item;else list.push(item);
+  deductStock(item.fid,item.g);
+  save();closeSheet();refresh();toast('已记录 '+item.name);
+}
+function quickAdd(fid){
+  const f=foodById(fid);if(!f)return;
+  const units=f.units&&f.units.length?f.units:[{name:'g',g:1}];
+  const u=units.find(x=>x.name===f.lastUnit)||units[0];
+  const g=+(1*u.g).toFixed(1),n=foodNutr(f,g);
+  f.used=(f.used||0)+1;f.last=cur;f.lastUnit=u.name;
+  pushItem({fid:f.id,name:f.name,qty:1,unit:u.name,g,kcal:n.kcal,p:n.p,f:n.f,c:n.c,fib:n.fib,micro:n.micro});
+}
+
+/* ---------- 食物编辑 ---------- */
+let sheetSaveAuto=false;
+const MICRO_ALL=Object.entries(MICRO_DEF).map(([key,v])=>({key,name:v.n,unit:v.u}));
+function microFieldRow(items,m){
+  let html='';
+  for(let i=0;i<items.length;i+=3){
+    html+='<div class="row">'+items.slice(i,i+3).map(it=>`<div><label>${it.name} ${it.unit}</label><input id="fId_${it.key}" type="number" inputmode="decimal" value="${m[it.key]!=null?n1(m[it.key]):''}" placeholder="—"></div>`).join('')+'</div>';
+  }
+  return html;
+}
+function unitRowHTML(u){
+  return `<div class="row unitrow" style="margin-top:4px"><input value="${esc(u.name)}" class="un" placeholder="单位名"><input type="number" inputmode="decimal" value="${n2(u.g)}" class="ug" placeholder="g" style="flex:0 0 88px"><span style="font-size:13px;color:var(--sub);white-space:nowrap">g</span><button class="del" data-act="fDelUnitRow">✕</button></div>`;
+}
+function openFoodEdit(id){
+  const f=id?foodById(id):null,m=(f&&f.micro)||{};
+  const funits=(f&&f.units&&f.units.length)?f.units:[{name:'g',g:1}];
+  const commonM=MICRO_ALL.filter(x=>db.microList.some(mi=>mi.key===x.key)),extraM=MICRO_ALL.filter(x=>!db.microList.some(mi=>mi.key===x.key));
+  const html=`<label>食物名称</label><input id="fName" value="${esc(f?f.name:'')}" placeholder="如：鸡胸肉">
+  <label>分类</label><select id="fCat"><option value="">常规食物</option><option value="sup" ${f&&f.cat==='sup'?'selected':''}>💊 补剂</option></select>
+  <div class="sec-title" style="margin-top:12px">⚖️ 单位换算（1单位 = 多少g，可多个）</div>
+  <div id="fUnits">${funits.map(u=>unitRowHTML(u)).join('')}</div>
+  <div class="row" style="margin-top:6px"><input id="fUName" placeholder="新单位名，如 个/碗/勺/片"><input id="fUG" type="number" inputmode="decimal" placeholder="= 多少 g"></div>
+  <button class="btn ghost small" style="margin-top:6px" data-act="fAddUnit">＋ 添加单位</button>
+  <div class="sec-title" style="margin-top:12px">📦 库存与上限（可选，用于「今天吃什么」自动分配）</div>
+  <label>现有库存</label>
+  <div class="row"><input id="fStockQty" type="number" inputmode="decimal" value="${f&&f.stock!=null?n1(f.stock/(f.stockUnit&&f.stockUnit!=='克'?Math.max(0.0001,planUnitG(f,f.stockUnit)):1)):''}" placeholder="如 500 或 10" data-inp="fStockHint"><select id="fStockUnit" data-chg="fStockHint"></select><span id="fStockHint" class="hint" style="align-self:center;white-space:nowrap"></span></div>
+  <label>单餐上限（自动分配时单餐最多放多少，超出会拆到其他餐）</label>
+  <div class="row"><input id="fMealMaxQty" type="number" inputmode="decimal" value="${f&&f.mealMax!=null?n1(f.mealMax/(f.mealUnit&&f.mealUnit!=='克'?Math.max(0.0001,planUnitG(f,f.mealUnit)):1)):''}" placeholder="留空=用通用值" data-inp="fMealHint"><select id="fMealUnit" data-chg="fMealHint"></select></div>
+  <label>允许浮动（余量可超过上限的幅度，单位同上）</label>
+  <div class="row"><input id="fMealTolQty" type="number" inputmode="decimal" value="${f&&f.mealTol!=null?n1(f.mealTol/(f.mealUnit&&f.mealUnit!=='克'?Math.max(0.0001,planUnitG(f,f.mealUnit)):1)):''}" placeholder="留空=用通用值" data-inp="fMealHint"><span id="fMealUnitLbl" class="hint" style="align-self:center;white-space:nowrap;flex:0 0 76px"></span></div>
+  <div class="hint" id="fMealHint"></div>
+  <label>单日上限（一天内这种食物累计最多纳入多少，全部餐次合计）</label>
+  <div class="row"><input id="fDayMaxQty" type="number" inputmode="decimal" value="${f&&f.dayMax!=null?n1(f.dayMax/(f.dayUnit&&f.dayUnit!=='克'?Math.max(0.0001,planUnitG(f,f.dayUnit)):1)):''}" placeholder="留空=用通用值 · 0=不限" data-inp="fDayHint"><select id="fDayUnit" data-chg="fDayHint"></select><span id="fDayUnitLbl" class="hint" style="align-self:center;white-space:nowrap;flex:0 0 76px"></span></div>
+  <div class="hint" id="fDayHint"></div>
+  <label>最多分几餐（自动排餐时最多拆到几餐；默认 2＝对半分）</label>
+  <select id="fSplit"><option value="">默认（2 餐 · 对半分）</option><option value="1">1 餐（整份放一餐）</option><option value="2">2 餐（对半分）</option><option value="3">3 餐（每餐都放一点）</option></select>
+  <div class="hint">库存：记录该食物时自动扣减（如手工记录 200g 米饭，库存就少 200g）。四项都支持按"个/袋/片"填（先在上面定义单位），也可按克填。<br>单餐上限：自动分配三餐时，单餐最多放这么多，超出会拆到其他餐；浮动是允许的上下幅度（避免余量尴尬）。<br>单日上限：一天内这种食物最多纳入多少（各餐合计），建议里超出部分会被截断；留空＝用通用值，填 0＝不限。<br>最多分几餐：自动排餐时这种食物最多拆到几餐（对半分）；单餐上限始终不会被突破，放不下时会先下调总量。<br>⚠️ 圆点「分配」按钮在「今天吃什么」里，改的是同一组设置。</div>
+  <div class="sec-title" style="margin-top:12px">📐 营养含量基准（下面的数值按此基准填写）</div>
+  <div class="row"><input id="fBaseQty" type="number" inputmode="decimal" value="100" style="flex:0 0 76px" data-inp="fBaseHint"><select id="fBaseUnit" data-chg="fBaseHint" style="flex:1"></select><span id="fBaseHint" class="hint" style="align-self:center;white-space:nowrap"></span></div>
+  <div class="hint">常规食物按"每100克"填；维生素片这类按片算的，先在上面把 1片=多少g 建好，再在这里选"每1片"——之后所有营养数值都按 1 片填</div>
+  <label>热量口径</label><div class="row2" style="margin:0 0 10px"><button class="btn ghost" id="fModeM" data-act="fMode" data-m="manual">手填热量</button><button class="btn ghost" id="fModeA" data-act="fMode" data-m="auto">按宏量自动算</button></div>
+  <div class="row"><div><label>热量 kcal/基准</label><input id="fKcal" type="number" inputmode="decimal" value="${f?n1(f.kcal):''}" placeholder="0" data-inp="fKcalIn"></div><div><label>或 千焦 kJ</label><input id="fKj" type="number" inputmode="decimal" value="${f?n1(f.kcal*KJ):''}" placeholder="自动换算" data-inp="fKjIn"></div></div>
+  <div class="row"><div><label>蛋白质 g</label><input id="fP" type="number" inputmode="decimal" value="${f?n1(f.p):''}" placeholder="0" data-inp="fMacro"></div><div><label>脂肪 g</label><input id="fF" type="number" inputmode="decimal" value="${f?n1(f.f):''}" placeholder="0" data-inp="fMacro"></div></div>
+  <div class="row"><div><label>碳水 g</label><input id="fC" type="number" inputmode="decimal" value="${f?n1(f.c):''}" placeholder="0" data-inp="fMacro"></div><div><label>膳食纤维 g</label><input id="fFib" type="number" inputmode="decimal" value="${f?n1(f.fib):''}" placeholder="0"></div></div>
+  <div class="row"><div style="padding-top:4px"><input id="fFav" type="checkbox"> <span style="font-size:14px">⭐ 常吃置顶</span></div><div class="hint" style="padding-top:8px">1 kcal = 4.2 kJ（国标）</div></div>
+  <div class="sec-title" style="margin-top:12px">📋 粘贴营养成分表文本（自动识别填充，识别后基准自动设为每100克）</div>
+  <textarea id="fLabel" rows="5" placeholder="把包装上的营养成分表整段复制粘贴到这里，例如：&#10;项目 每100克 NRV%&#10;能量 1548千焦 18%&#10;蛋白质 3.2克 5%&#10;脂肪 3.6克 6%&#10;碳水化合物 12.5克 4%&#10;钠 60毫克 3%&#10;钙 118毫克 15%"></textarea>
+  <button class="btn ghost small" style="margin-top:6px" data-act="parseLabel">🔍 识别并填充上方字段</button>
+  <div class="hint" id="fLabelHint">整段粘贴即可（换行/空格/制表符都行，Excel 复制的也能用）；NRV% 列自动跳过；支持千焦↔大卡、克/毫克/微克自动换算；35 项营养素全支持（含单/多不饱和脂肪等易混项，各自独立识别）；未识别到的会列出来</div>
+  <div class="sec-title" style="margin-top:12px">微量元素（每基准量，可不填）</div>
+  ${microFieldRow(commonM,m)}
+  <button class="btn ghost small" style="margin-top:8px" data-act="toggleMicroFields" id="moreMicroBtn">🔽 更多营养素（维E/K、B族、胆碱、磷铜锰铬钼氟等）</button>
+  <div id="fMoreMicro" style="display:none;margin-top:8px">${microFieldRow(extraM,m)}</div>
+  <div id="fKcalHint" class="warn-box" style="display:none"></div>
+  <button class="btn" style="margin-top:12px" data-act="saveFood" data-fid="${f?f.id:''}">${f?'保存修改':'添加食物'}</button>
+  ${f?`<button class="btn danger" style="margin-top:8px" data-act="delFood" data-fid="${f.id}">删除食物</button>`:''}`;
+  openSheet(f?'编辑食物':'新建食物',html);
+  if(f&&f.fav)$('#fFav').checked=true;
+  if(f&&f.baseQty){$('#fBaseQty').value=n2(f.baseQty)}
+  fillAllUnitSel();
+  if(f&&f.baseName){const o=[...$('#fBaseUnit').options].find(x=>x.value===f.baseName);if(o)$('#fBaseUnit').value=f.baseName}
+  else if(f&&f.baseG&&f.baseG!==100){$('#fBaseQty').value=n2(f.baseG);$('#fBaseUnit').value='克'}
+  if(f&&f.stockUnit){const o=[...$('#fStockUnit').options].find(x=>x.value===f.stockUnit);if(o)$('#fStockUnit').value=f.stockUnit}
+  if(f&&f.mealUnit){const o=[...$('#fMealUnit').options].find(x=>x.value===f.mealUnit);if(o)$('#fMealUnit').value=f.mealUnit}
+  if(f&&f.dayUnit){const o=[...$('#fDayUnit').options].find(x=>x.value===f.dayUnit);if(o)$('#fDayUnit').value=f.dayUnit}
+  if(f&&f.splitMax){const o=[...$('#fSplit').options].find(x=>x.value===String(f.splitMax));if(o)$('#fSplit').value=String(f.splitMax)}
+  fBaseHint();fStockHint();fMealHint();fDayHint();
+  fMode(f?f.kcalAuto:(db.profile.kcalDefault==='auto'));
+}
+/* 表单里的单位下拉：选项 = 克 + 该食物已定义的单位（读 DOM，含未保存的新单位）。基准与库存共用 */
+function fillUnitSel(id,def){
+  const sel=$('#'+id);if(!sel)return;
+  const cur=sel.value||def;
+  const opts=[{name:'克',g:1}];
+  document.querySelectorAll('#fUnits .unitrow').forEach(r=>{
+    const n=r.querySelector('.un').value.trim(),g=parseFloat(r.querySelector('.ug').value);
+    if(n&&g>0&&n!=='g'&&n!=='克')opts.push({name:n,g});
+  });
+  sel.innerHTML=opts.map(o=>`<option value="${esc(o.name)}">${esc(o.name)}</option>`).join('');
+  sel.value=opts.some(o=>o.name===cur)?cur:def;
+  const lbl=$(id==='fMealUnit'?'#fMealUnitLbl':id==='fDayUnit'?'#fDayUnitLbl':null);
+  if(lbl)lbl.textContent=sel.value;
+}
+function fillAllUnitSel(){fillUnitSel('fBaseUnit','克');fillUnitSel('fStockUnit','克');fillUnitSel('fMealUnit','克');fillUnitSel('fDayUnit','克')}
+/* 表单里单位名 → 克数（1 个 = 多少 g） */
+function formUnitG(name){
+  if(!name||name==='克'||name==='g')return 1;
+  const row=[...document.querySelectorAll('#fUnits .unitrow')].find(r=>r.querySelector('.un').value.trim()===name);
+  return row?(parseFloat(row.querySelector('.ug').value)||1):1;
+}
+function fBaseG(){return +((num('fBaseQty')||1)*formUnitG(val('fBaseUnit'))).toFixed(4)}
+function fBaseHint(){
+  const q=num('fBaseQty')||1,sel=$('#fBaseUnit');
+  const n=sel?sel.value:'克';
+  const el=$('#fBaseHint');
+  if(el)el.textContent='= '+n2(q)+n+' = '+n2(fBaseG())+' g';
+}
+function fStockHint(){
+  const el=$('#fStockHint');if(!el)return;
+  const q=num('fStockQty'),n=val('fStockUnit')||'克';
+  el.textContent=($('#fStockQty').value.trim()===''||n==='克')?'':'= '+n2(q*formUnitG(n))+' g';
+}
+function fMealHint(){
+  const mu=val('fMealUnit')||'克',ug=formUnitG(mu);
+  const lbl=$('#fMealUnitLbl');if(lbl)lbl.textContent=mu;
+  const parts=[];
+  if($('#fMealMaxQty').value.trim()!=='')parts.push('单餐上限 = '+n1(num('fMealMaxQty')*ug)+' g');
+  if($('#fMealTolQty').value.trim()!=='')parts.push('浮动 = ±'+n1(num('fMealTolQty')*ug)+' g');
+  const el=$('#fMealHint');
+  if(el)el.textContent=parts.length?parts.join('　·　'):'留空则该食物沿用「今天吃什么」里的通用上限与浮动';
+}
+function fDayHint(){
+  const mu=val('fDayUnit')||'克',ug=formUnitG(mu);
+  const lbl=$('#fDayUnitLbl');if(lbl)lbl.textContent=mu;
+  const el=$('#fDayHint'),box=$('#fDayMaxQty');
+  if(!el||!box)return;
+  const raw=box.value.trim();
+  if(raw===''){el.textContent='留空则该食物沿用「今天吃什么」里的通用单日上限（默认 300g）';return}
+  const q=num('fDayMaxQty');
+  el.textContent=q>0?('单日上限 = '+n1(q*ug)+' g（各餐合计不超过）'):'0 = 该食物不设单日上限';
+}
+function baseLabel(f){
+  const b=f.baseG||100;
+  if(b===100)return'每100g';
+  const q=f.baseQty||b,n=f.baseName||'g';
+  return`每${n2(q)}${n}(${n2(b)}g)`;
+}
+function fMode(auto){
+  sheetSaveAuto=auto;
+  $('#fKcal').disabled=auto;
+  $('#fKj').disabled=auto;
+  $('#fModeM').className='btn ghost'+(auto?'':' on');
+  $('#fModeA').className='btn ghost'+(auto?' on':'');
+  fKcalHint();
+}
+function fKcalHint(){
+  const p=num('fP'),f=num('fF'),c=num('fC'),kcal=num('fKcal');
+  const hint=$('#fKcalHint');
+  if(sheetSaveAuto){
+    const v=p+f+c>0?p*4+f*9+c*4:0;
+    $('#fKcal').value=v?n1(v):'';
+    $('#fKj').value=v?n1(v*KJ):'';
+    hint.style.display='none';return;
+  }
+  if(p+f+c>0&&kcal>0){
+    const calc=p*4+f*9+c*4;
+    if(Math.abs(calc-kcal)/kcal>0.1){hint.style.display='block';hint.textContent=`⚠️ 按宏量计算约 ${n1(calc)} kcal，与你填写的 ${n1(kcal)} kcal 相差较大，请核对`;return}
+  }
+  hint.style.display='none';
+}
+/* 营养成分表文本识别（纯本地解析，不联网）
+   关键词表顺序 = 提取顺序，必须"长词优先"，否则短词会先吃掉长词的数值。
+   易混淆的三组（顺序不能动）：
+   ① 单不饱和脂肪酸 / 多不饱和脂肪酸 都包含"不饱和脂肪酸"，后者又包含"饱和脂肪酸"，
+      所以必须 单不饱和 → 多不饱和 → 不饱和 → 饱和 → 反式 → 脂肪酸 → 脂肪 逐级提取；
+   ② 维生素B12 必须先于 维生素B1；
+   ③ 添加糖/蔗糖等具体糖名必须先于泛指"糖"。
+   以 _ 开头的键为"只提取不保存"（App 里没有对应字段，仅用于把该词从文本中移除，避免误配）。 */
+const LABEL_KEYS=[
+  ['kcal',['能量值','能量','热量']],
+  ['mufa',['单不饱和脂肪酸','单不饱和脂肪']],
+  ['pufa',['多不饱和脂肪酸','多不饱和脂肪']],
+  ['_ufa',['不饱和脂肪酸']],
+  ['sf',['饱和脂肪酸','饱和脂肪']],
+  ['tfa',['反式脂肪酸','反式脂肪']],
+  ['_fa',['脂肪酸']],
+  ['c',['碳水化合物','碳水化物','碳水']],
+  ['fib',['膳食纤维','纤维']],
+  ['_sugarExcl',['糖醇','低聚果糖','低聚半乳糖','低聚糖','抗性糊精','结晶果糖']],
+  ['su',['添加糖','蔗糖','白砂糖','果葡糖浆','果糖浆','葡萄糖浆','玉米糖浆','麦芽糖浆']],
+  ['nsu',['天然糖','糖']],
+  ['nsu',['乳糖','果糖','葡萄糖','麦芽糖','半乳糖']], // 兜底：标签无"糖"总行时，具体糖名归入天然糖
+  ['h2o',['水分']],
+  ['cho',['胆碱']],
+  ['vb12',['维生素B12','维B12','维生素Ｂ12']],
+  ['vb1',['维生素B1','维B1','硫胺素']],
+  ['vb2',['维生素B2','维B2','核黄素']],
+  ['vb6',['维生素B6','维B6']],
+  ['b3',['烟酸','维生素B3','维B3','尼克酸']],
+  ['b5',['泛酸','维生素B5','维B5']],
+  ['bio',['生物素','维生素B7','维B7']],
+  ['fa',['叶酸','维生素B9','维B9']],
+  ['va',['维生素A','维A']],
+  ['vc',['维生素C','维C']],
+  ['vd',['维生素D','维D']],
+  ['ve',['维生素E','维E']],
+  ['vk',['维生素K','维K']],
+  ['p',['蛋白质','蛋白']],
+  ['f',['脂肪']],
+  ['na',['钠']],['ca',['钙']],['fe',['铁']],['zn',['锌']],
+  ['mg',['镁']],['k',['钾']],['pho',['磷']],['cu',['铜']],['mn',['锰']],
+  ['se',['硒']],['i',['碘']],['cr',['铬']],['mo',['钼']],['fl',['氟']]
+];
+const MACRO_FIELD={p:'fP',f:'fF',c:'fC',fib:'fFib'},MACRO_NAME={p:'蛋白质',f:'脂肪',c:'碳水',fib:'膳食纤维'};
+function parseLabel(){
+  const raw=val('fLabel');
+  if(!raw)return toast('请先粘贴营养成分表文本');
+  // 营养成分表按每100g（或每100ml）标注，识别前先把基准重置为每100克，保证数值口径一致
+  const bq=$('#fBaseQty'),bu=$('#fBaseUnit');
+  if(bq&&bu){bq.value='100';fillAllUnitSel();bu.value='克';fBaseHint()}
+  let t=raw.replace(/[\u3000\t｜|]/g,' ').replace(/[（）]/g,'(').replace(/\s+/g,' ');
+  const got={};
+  const toG=(v,u)=>(u==='毫克'||u==='mg')?v/1000:(u==='微克'||u==='ug'||u==='μg'||u==='µg')?v/1e6:v;
+  for(const [key,names] of LABEL_KEYS){
+    if(got[key]!==undefined)continue; // 已被更靠前的规则取到 → 后面的同名条目只作兜底
+    const def=MICRO_DEF[key],target=key==='kcal'?'kcal':(def?def.u:'g'),discard=key.charAt(0)==='_';
+    for(const nm of names){
+      const body=nm.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'[^0-9\\-]{0,12}([0-9]+(?:\\.[0-9]+)?)\\s*(千焦|kj|千卡|大卡|kcal|毫克|mg|微克|ug|μg|µg|克|g)?';
+      if(discard){t=t.replace(new RegExp(body,'ig'),' ');continue} // 排除项：删掉文本中所有该词，防止被后面对泛指词的匹配误吃
+      const m=t.match(new RegExp(body,'i'));
+      if(!m)continue;
+      t=t.replace(m[0],' ');
+      const v=parseFloat(m[1]),u=(m[2]||'').toLowerCase();
+      if(key==='kcal')got.kcal=(u==='千焦'||u==='kj')?Math.round(v/KJ*10)/10:v;
+      else if(target==='g')got[key]=+toG(v,u).toFixed(3);
+      else if(target.indexOf('μg')===0)got[key]=+(toG(v,u)*1e6).toFixed(2);
+      else got[key]=+(toG(v,u)*1000).toFixed(2);
+      break;
+    }
+  }
+  const fmt=v=>v>=100?Math.round(v):v>=10?Math.round(v*10)/10:v>=1?Math.round(v*100)/100:Math.round(v*1000)/1000;
+  const set=(id,v)=>{const el=$('#'+id);if(el&&v>0)el.value=fmt(v)};
+  const found=[],zero=[],missing=[];
+  const tracked=new Set(db.microList.map(m=>m.key));
+  if(got.kcal>0){set('fKcal',got.kcal);set('fKj',got.kcal*KJ);found.push('能量')}
+  for(const k of ['p','f','c','fib'])if(got[k]>0){set(MACRO_FIELD[k],got[k]);found.push(MACRO_NAME[k])}
+  if(!(got.kcal>0)&&(got.p>0||got.f>0||got.c>0)){ // 标签无能量行时按宏量反推
+    const calc=(got.p||0)*4+(got.f||0)*9+(got.c||0)*4;
+    if(calc>0){set('fKcal',calc);set('fKj',calc*KJ);got.kcal=calc;found.push('能量(按宏量算)')}
+  }
+  // 所有营养素都回填（不止当前跟踪的那几项），并自动展开"更多营养素"区
+  let extraFilled=false;
+  for(const it of MICRO_ALL){
+    if(!MICRO_DEF[it.key]||got[it.key]===undefined)continue;
+    if(got[it.key]>0){
+      set('fId_'+it.key,got[it.key]);
+      found.push(it.name+(!tracked.has(it.key)?'(未跟踪)':''));
+      if(!tracked.has(it.key))extraFilled=true;
+    }else zero.push(it.name);
+  }
+  for(const m of db.microList)if(MICRO_DEF[m.key]&&got[m.key]===undefined)missing.push(m.name);
+  if(extraFilled){
+    const box=$('#fMoreMicro'),btn=$('#moreMicroBtn');
+    if(box&&box.style.display==='none'){box.style.display='block';if(btn)btn.textContent='🔼 更多营养素（维E/K、B族、胆碱、磷铜锰铬钼氟等）'}
+  }
+  fKcalHint();
+  let msg;
+  if(found.length){
+    msg=`✅ 识别到 ${found.length} 项：${found.join('、')}`;
+    if(zero.length)msg+=`\n标签标注为 0：${zero.join('、')}`;
+    if(missing.length)msg+=`\n未识别到（可手动填）：${missing.join('、')}`;
+    if(extraFilled)msg+='\nℹ️ 含未跟踪的营养素，已自动展开"更多营养素"区，可去勾选跟踪';
+  }else msg='⚠️ 没识别到内容。请把营养成分表整段复制粘贴（含"能量/蛋白质/脂肪/钠"等文字），详见下方格式说明';
+  if(/每\s*份|\/份|每包|每袋/.test(raw))msg+='\n⚠️ 检测到「每份/每包」，本表按每100g录入，请自行换算或改填每100g';
+  if(/每\s*100\s*(毫升|ml)/i.test(raw))msg+='\nℹ️ 检测到每100毫升，按每100g等效录入';
+  $('#fLabelHint').textContent=msg;
+  toast(found.length?'✅ 已识别 '+found.length+' 项':'未识别到内容');
+}
+/* 营养目标构成：点某一行，看今天每个食物对该目标的贡献 */
+const NUTRI_META={kcal:{name:'热量',unit:'kcal'},p:{name:'蛋白质',unit:'g'},f:{name:'脂肪',unit:'g'},c:{name:'碳水',unit:'g'},fib:{name:'膳食纤维',unit:'g'}};
+function openNutriBreak(key){
+  const log=getLog(cur),t=dayTarget(cur),s=sumDay(cur);
+  const def=MICRO_DEF[key],meta=NUTRI_META[key]||(def?{name:def.n,unit:def.u}:null);
+  if(!meta)return;
+  const isMacro=!!NUTRI_META[key];
+  const total=isMacro?(key==='kcal'?s.kcal:s[key]):(s.micro[key]||0);
+  const tgt=isMacro?(key==='kcal'?t.kcal:key==='fib'?t.fiber:key==='p'?t.protein:key==='f'?t.fat:t.carb):(t.micro[key]||0);
+  const valOf=it=>isMacro?(key==='kcal'?(it.boil?0:it.kcal):(it.boil?0:(it[key]||0))):((it.micro&&it.micro[key])||0);
+  const rows=[];
+  if(log)for(const mk of ['breakfast','lunch','dinner','snack']){
+    for(const it of (log.meals[mk]||[])){
+      const v=valOf(it);
+      if(v>0)rows.push({name:it.name,qty:it.qty,unit:it.unit,g:it.g,meal:mk,v});
+    }
+  }
+  rows.sort((a,b)=>b.v-a.v);
+  const mode=def&&def.min?2:(def?1:0),pct=tgt>0?total/tgt*100:0,cls=pctCls(pct,mode);
+  let html=`<div class="card" style="margin-bottom:10px">
+    <div class="pt" style="display:flex;justify-content:space-between;font-size:13px"><span>今日已摄入</span><span><b>${n1(total)}</b> / ${n1(tgt)} ${meta.unit}</span><span class="pct ${cls}">${tgt>0?Math.round(pct)+'%':'—'}</span></div>
+    <div class="bar" style="margin-top:6px"><i class="${cls}" style="width:${Math.min(100,pct)}%"></i></div>
+    <div class="hint" style="margin-top:8px">${rows.length?`共 ${rows.length} 项食物有贡献，按贡献从大到小排列；百分比 = 该项占全天目标的比例`:`今天还没有记录含${meta.name}的食物`}</div>
+    ${key==='kcal'&&t.train?`<div class="hint">目标已含训练日 +${n1(db.profile.trainOffset)} kcal；另有运动消耗 ${n1(s.ex)} kcal 计入「还可以吃」</div>`:''}
+    ${key==='h2o'?`<div class="hint">食物水分已计入饮水进度（打卡喝水量 + 食物水分）</div>`:''}</div>`;
+  if(rows.length)html+='<div class="card">'+rows.map(r=>{
+    const p=tgt>0?r.v/tgt*100:0;
+    return`<div class="item"><div class="grow"><div class="iname">${esc(r.name)}</div><div class="isub">${MEAL_NAMES[r.meal]} · ${n1(r.qty)}${esc(r.unit)}（${n1(r.g)}g）</div>
+      <div class="bar" style="height:6px;margin-top:5px"><i class="ok" style="width:${Math.min(100,p)}%"></i></div></div>
+      <div class="ival">${n1(r.v)} ${meta.unit}<br><span style="font-size:12px;color:var(--sub);font-weight:400">占目标 ${Math.round(p)}%</span></div></div>`;
+  }).join('')+'</div>';
+  openSheet(meta.name+' · 今日构成',html);
+}
+/* 单餐构成：点餐次标题展开——营养素热量占比 + 各食材占比 */
+const MEAL_ICON={breakfast:'🌅',lunch:'☀️',dinner:'🌙',snack:'🍪'};
+const AMDR={p:[10,20],c:[50,65],f:[20,30]};
+function openMealBreak(mk){
+  const log=getLog(cur),list=(log&&log.meals[mk])||[];
+  const kcal=list.reduce((a,i)=>a+(i.boil?0:i.kcal),0);
+  const p=list.reduce((a,i)=>a+(i.boil?0:i.p),0),c=list.reduce((a,i)=>a+(i.boil?0:i.c),0),f=list.reduce((a,i)=>a+(i.boil?0:i.f),0);
+  const pk=p*4,ck=c*4,fk=f*9,sum=pk+ck+fk;
+  const T=dayTarget(cur),Tk=T.protein*4+T.carb*4+T.fat*9||1;
+  const Tp=T.protein*4/Tk*100,Tc=T.carb*4/Tk*100,Tf=T.fat*9/Tk*100;
+  let html=`<div class="card" style="margin-bottom:10px"><div class="mhead"><span>${MEAL_ICON[mk]} ${MEAL_NAMES[mk]}</span><span class="mcal">${n1(kcal)} kcal · ${list.length} 项</span></div>`;
+  const mph=photosOf(log,mk);
+  if(mph.length)html+=`<div class="photo-strip">${mph.map(src=>`<div class="ps-item"><img data-act="photoShow" src="${src}" alt="餐照"></div>`).join('')}</div>`;
+  if(sum>0){
+    const pp=pk/sum*100,cp=ck/sum*100,fp=fk/sum*100;
+    const mark=(v,r)=>v>=r[0]&&v<=r[1]?'✓':'✗';
+    html+=`<div style="display:flex;height:14px;border-radius:7px;overflow:hidden;margin:8px 0">
+      <i style="width:${pp}%;background:var(--cP)"></i><i style="width:${cp}%;background:var(--cC)"></i><i style="width:${fp}%;background:var(--cF)"></i></div>
+      <div style="font-weight:700;text-align:center;margin:10px 0;font-size:15px">蛋白质：碳水：脂肪 = ${Math.round(pp)}% : ${Math.round(cp)}% : ${Math.round(fp)}%</div>
+      <div class="hint" style="font-size:13px;color:var(--text)">对照参考区间：蛋白质 <b style="color:var(--cP)">${Math.round(pp)}% ${mark(pp,AMDR.p)}</b>（10–20%）· 碳水 <b style="color:var(--cC)">${Math.round(cp)}% ${mark(cp,AMDR.c)}</b>（50–65%）· 脂肪 <b style="color:var(--cF)">${Math.round(fp)}% ${mark(fp,AMDR.f)}</b>（20–30%）</div>
+      <div class="hint" style="font-size:13px;color:var(--text)">你自己的目标比例：蛋白质 ${Math.round(Tp)}% · 碳水 ${Math.round(Tc)}% · 脂肪 ${Math.round(Tf)}%（由「我的→目标设置」的蛋白 g/kg 与脂肪供能比算出）</div>
+      <div class="hint">按 蛋白4 · 碳水4 · 脂肪9 kcal/g 换算供能比；参考区间出自中国 DRIs 宏量营养素可接受范围（AMDR）。⚠️ AMDR 是<strong>全天</strong>标准，单餐不必严格落在区间内，全天达标更重要（训练前后那餐蛋白偏高、碳水偏低是正常的）</div>
+      <div class="hint">📷 想给这一餐拍照存底？关掉本页后点餐次右边的相机按钮，可一次选多张（每餐最多 9 张，照片随数据一起备份）</div>`;
+  }else html+='<div class="empty">这一餐还没有记录</div>';
+  html+='</div>';
+  if(list.length){
+    html+='<div class="sec-title" style="margin-top:0">食材占比（按热量）</div><div class="card">'+list.slice().sort((a,b)=>b.kcal-a.kcal).map(it=>{
+      const pct=sum>0?it.kcal/sum*100:0;
+      return`<div class="item"><div class="grow"><div class="iname">${esc(it.name)}${it.boil?' <span style="color:var(--cFib);font-size:12px">🍲水煮</span>':''}</div><div class="isub">${it.unit==='g'?n1(it.g)+'g':n1(it.qty)+esc(it.unit)+'（'+n1(it.g)+'g）'} · 蛋白 ${n1(it.p)} · 脂肪 ${n1(it.f)} · 碳水 ${n1(it.c)}</div>
+      <div class="bar" style="height:6px;margin-top:5px"><i class="ok" style="width:${Math.min(100,pct)}%"></i></div></div>
+      <div class="ival">${it.boil?'<span style="color:var(--cFib)">不计热量与营养素</span>':n1(it.kcal)+' kcal'}<br><span style="font-size:12px;color:var(--sub);font-weight:400">${it.boil?'':('占本餐 '+Math.round(pct)+'%')}</span></div></div>`;
+    }).join('')+'</div>';
+  }
+  openSheet(MEAL_NAMES[mk]+' · 构成',html);
+}
+/* ---------- 今天吃什么：勾选食材 + 填数量/单位 → 自动分配到三餐 ---------- */
+let planSel={},planCache=null,planRem=null,planNotes=[],planQuery='',planMode='day',planOneMeal='breakfast',planSrc='all'; // 餐次能量占比见 planShareOf（膳食指南：早25–30% 午30–40% 晚30–35%）
+function planUnits(f){return(f.units&&f.units.length)?f.units:[{name:'g',g:1}]}
+/* 规划器里单位下拉框的选项：食物自定义的单位 + 始终保留"g（克）"。
+   否则内部按克记录的项（如拆分后的块）在下拉框里会显示成第一个自定义单位（"个"），
+   造成"填 50 个 → 只算 50g"的错位。自定义单位排在前面（新增食物行默认按它填数量）。 */
+function planUnitOpts(f){return planUnits(f).filter(u=>u.name!=='g'&&u.name!=='克').concat([{name:'g',g:1}])}
+function planUnitG(f,uname){const u=planUnits(f).find(x=>x.name===uname);return u?u.g:1}
+function planDefault(f){ // 有自定义单位时默认"1个单位"，否则默认基准克数（一般 100g）
+  const u=planUnits(f).find(x=>x.name!=='g'&&x.name===f.lastUnit)||planUnits(f).find(x=>x.name!=='g');
+  return u?{q:1,u:u.name}:{q:f.baseG||100,u:'g'};
+}
+function planGrams(fid){
+  const f=foodById(fid),s=planSel[fid];
+  return(f&&s)?+(s.q*planUnitG(f,s.u)).toFixed(2):0;
+}
+function planItems(){
+  const out=[];
+  for(const fid in planSel){
+    const f=foodById(fid),s=planSel[fid],g=planGrams(fid);
+    if(!f||!(g>0))continue;
+    out.push({f,g,n:foodNutr(f,g),q:s.q,u:s.u});
+  }
+  return out.sort((a,b)=>b.n.kcal-a.n.kcal);
+}
+function planRemain(){
+  const t=dayTarget(cur),s=sumDay(cur);
+  return{kcal:Math.max(0,t.kcal-s.kcal),p:Math.max(0,t.protein-s.p),f:Math.max(0,t.fat-s.f),c:Math.max(0,t.carb-s.c),fib:Math.max(0,t.fiber-s.fib),tgt:t};
+}
+function planMealKeys(){return planMode==='one'?[planOneMeal]:['breakfast','lunch','dinner']}
+function planShareOf(k){return planMode==='one'?1:{breakfast:0.30,lunch:0.35,dinner:0.35}[k]}
+/* 单餐上限与浮动：食物单独设过就以食物为准，否则用通用值 */
+function planCapOf(f){
+  const M=f.mealMax!=null?f.mealMax:(db.profile.mealMax!=null?db.profile.mealMax:150);
+  const T=f.mealTol!=null?f.mealTol:(db.profile.mealTol!=null?db.profile.mealTol:20);
+  return{M:Math.max(0,M),T:Math.max(0,T)};
+}
+/* 单日上限（克，0 = 不限）：一天内这种食物各餐合计最多纳入多少。
+   食物单独设过就以食物为准（0=不限）；否则用通用值（从未设置过 = 默认 300g，留空 = 不限） */
+function planDayOf(f){
+  if(f.dayMax!=null)return Math.max(0,f.dayMax);
+  const pv=db.profile.dayMax;
+  if(pv===undefined)return 300;
+  return Math.max(0,pv||0);
+}
+/* 最多分几餐：食物单独设过就以食物为准（1/2/3），否则默认 2（"最多对半分"） */
+function planSplitOf(f){const v=f.splitMax;return(v>=1&&v<=3)?Math.round(v):2}
+/* 该食物的最小自定义单位（克）；没有自定义单位（只有克/克）时返回 0 */
+function planMinUnit(f){
+  let m=0;(f.units||[]).forEach(u=>{if(u.name!=='g'&&u.name!=='克'&&u.g>0&&(!m||u.g<m))m=u.g});
+  return m>0?m:0;
+}
+function planDens(f,k){return f[k]/(f.baseG||100)}
+/* 在「今天吃什么」里直接设置某食材的单日上限（不必进食物库） */
+let planCapFid=null;
+function openPlanCap(fid){
+  const f=foodById(fid);if(!f)return;
+  planCapFid=fid;
+  const own=f.dayMax,ownU=f.dayUnit||'克';
+  const ug=ownU!=='克'?planUnitG(f,ownU):1;
+  const opts=[{name:'克',g:1}].concat(planUnits(f).filter(u=>u.name!=='g'&&u.name!=='克'));
+  const src=own==null?'单日上限当前：沿用通用值（'+dayText(f)+'）':(own>0?'单日上限当前：该食材单独设置 '+dayText(f):'单日上限当前：该食材设为不限');
+  const sp=f.splitMax;
+  const html=`<div class="hint" style="font-size:14px;color:var(--text)">${esc(f.name)} · 分配设置：单日上限＝一天内最多纳入多少；最多分几餐＝自动排餐时最多拆到几餐。</div>
+  <div class="hint">${src}</div>
+  <label>单日上限（留空 = 用通用值；填 0 = 不限）</label>
+  <div class="row"><input id="pcQty" type="number" inputmode="decimal" value="${own!=null?n1(own/ug):''}" placeholder="如 2" data-inp="planCapHint"><select id="pcUnit" data-chg="planCapHint" style="flex:0 0 92px">${opts.map(o=>`<option ${o.name===ownU?'selected':''}>${esc(o.name)}</option>`).join('')}</select></div>
+  <div class="hint" id="pcHint"></div>
+  <label>最多分几餐</label>
+  <select id="pcSplit"><option value="" ${sp==null?'selected':''}>默认（2 餐 · 对半分）</option><option value="1" ${sp===1?'selected':''}>1 餐（整份放一餐）</option><option value="2" ${sp===2?'selected':''}>2 餐（对半分）</option><option value="3" ${sp===3?'selected':''}>3 餐（每餐都放一点）</option></select>
+  <div class="hint">拆分时尽量"对半分"，大的一份给缺口更大的餐；<b>有自定义单位（个/盒/片/勺…）的食材只按"整个单位"分，不会出现半个/四分之一个</b>——只有 1 个单位就整份放一餐；不是整数个单位的（如按克填的量）按克均分。<b>单餐上限始终不会被突破</b>——放不下就先按"单餐上限×餐数"把总量下调并提示。极小量（每份不足 10g，如补剂）不拆。</div>
+  <div class="chips" style="margin-top:6px"><button class="chip" data-act="planCapUnlimited" data-fid="${f.id}">设为不限</button><button class="chip" data-act="planCapAuto" data-fid="${f.id}">恢复通用值</button></div>
+  <div class="hint">单餐上限与浮动仍在「食物库 → 编辑食物」里设置。</div>
+  <button class="btn" style="margin-top:10px" data-act="planCapSave" data-fid="${f.id}">保存</button>
+  <button class="btn ghost" style="margin-top:8px" data-act="planBack">← 返回食材列表</button>`;
+  openSheet('分配设置 · '+f.name,html,'plan');
+  planCapHint();
+}
+function planCapHint(){
+  const el=$('#pcHint');if(!el)return;
+  const f=planCapFid?foodById(planCapFid):null,box=$('#pcQty');if(!f||!box)return;
+  const raw=box.value.trim();
+  if(raw===''){el.textContent='留空 = 沿用通用值';return}
+  const q=num('pcQty'),ug=planUnitG(f,val('pcUnit')||'克');
+  el.textContent=q>0?('单日上限 = '+n1(q*ug)+' g（各餐合计不超过）'):'0 = 该食材不设单日上限';
+}
+function planCapSet(fid,v,u){
+  const f=foodById(fid);if(!f)return;
+  f.dayMax=v;if(u)f.dayUnit=u;
+  save();closeSheet();renderPlanSheet(planQuery);
+  toast('✅ '+f.name+'：单日上限 '+dayText(f)+' · 最多分 '+planSplitOf(f)+' 餐');
+}
+function renderPlanSheet(q){
+  const rem=planRemain();
+  const pm=db.profile.mealMax!=null?db.profile.mealMax:150,pt=db.profile.mealTol!=null?db.profile.mealTol:20;
+  const pdy=db.profile.dayMax===undefined?300:db.profile.dayMax; // undefined=从未设置（默认300）；null/0=不限
+  let html=`<div class="card" style="margin-bottom:10px">
+   <div class="warn-box" style="margin:0 0 10px">🧪 <b>本功能仅作测试，还不稳定</b>：自动排餐的规则仍在调整，生成结果请核对后再加入记录；不合意可以直接在结果页改数量、删项或长按拖动。</div>
+   <div class="hint" style="font-size:14px;color:var(--text)">今日还需：热量 <b>${Math.round(rem.kcal)}</b> kcal · 蛋白 <b>${n1(rem.p)}</b>g · 脂肪 ${n1(rem.f)}g · 碳水 ${n1(rem.c)}g · 纤维 ${n1(rem.fib)}g</div>
+   <div style="margin-top:10px;font-size:13px;color:var(--sub)">分配到</div>
+   <div class="chips" style="margin-top:4px"><button class="chip ${planMode==='day'?'on':''}" data-act="planMode" data-m="day">全天三餐</button>${['breakfast','lunch','dinner','snack'].map(k=>`<button class="chip ${planMode==='one'&&planOneMeal===k?'on':''}" data-act="planMode" data-m="one" data-meal="${k}">只排${MEAL_NAMES[k]}</button>`).join('')}</div>
+   <div style="margin-top:10px;font-size:13px;color:var(--sub)">食材来源</div>
+   <div class="chips" style="margin-top:4px"><button class="chip ${planSrc==='all'?'on':''}" data-act="planSrc" data-s="all">整个食物库（按库存）</button><button class="chip ${planSrc==='pick'?'on':''}" data-act="planSrc" data-s="pick">手动勾选</button></div>
+   <div class="row" style="margin-top:10px"><div><label>通用单餐上限 g</label><input id="planMax" type="number" inputmode="decimal" value="${n1(pm)}" data-inp="planCfg"></div><div><label>允许浮动 ± g</label><input id="planTol" type="number" inputmode="decimal" value="${n1(pt)}" data-inp="planCfg"></div><div><label>通用单日上限 g</label><input id="planDay" type="number" inputmode="decimal" placeholder="留空=不限" value="${pdy==null?'':n1(pdy)}" data-inp="planCfg"></div></div>
+   <div class="hint">单餐上限＝自动排餐时每餐最多放多少（<b>不会被突破</b>，放不下会先下调这种食材的总量），浮动＝允许的上下幅度。单日上限＝一天内最多纳入多少（各餐合计）；默认 300g，留空 = 不限。<b>每种食材旁都有「分配」按钮</b>，点开可单独设这种食材的单日上限与「最多分几餐」（默认 2 餐＝对半分；拆分时大的那份给缺口更大的餐）。</div>
+   <div class="hint">${planSrc==='all'?'整库模式：使用食物库里<b>填过"现有库存"</b>的食物（补剂除外），按今日缺口反推该吃多少、凑够即止（不会把整库都排上），库存与单日上限为本次用量上限。':'手动模式：按你下方勾选并填写的数量分配；某项超过单日上限时按上限截断。'}</div>
+  </div>`;
+  if(planSrc==='pick'){
+    html+=`<input id="planQ" placeholder="🔍 搜索食物" value="${esc(q||'')}" data-inp="planQ">
+    <div id="planList" style="max-height:36vh;overflow-y:auto;margin-top:8px">${planListHTML(q)}</div>`;
+  }else{
+    html+=`<div class="sec-title" style="margin-top:4px">可用食材（有库存）</div><div id="planList" style="max-height:34vh;overflow-y:auto">${planStockHTML()}</div>`;
+  }
+  html+=`<div class="sfoot" id="planSum"></div>`;
+  openSheet('今天吃什么',html);
+  planSum();
+}
+function planStockHTML(){
+  const list=db.foods.filter(f=>f.stock!=null&&f.stock>0&&f.cat!=='sup').sort((a,b)=>planDens(b,'p')-planDens(a,'p'));
+  if(!list.length)return'<div class="empty">食物库里还没有填过"现有库存"的食物。<br>去「我的 → 食物库」编辑食物，在"现有库存"里填入家里有多少（可按个/袋/片填），就能用整库模式。</div>';
+  return list.map(f=>`<div class="item"><div class="grow"><div class="iname">${esc(f.name)}</div><div class="isub">库存 <b>${stockText(f)}</b>　单日上限 <b>${dayText(f)}</b>${baseLabel(f)?'　'+baseLabel(f):''}：${n1(f.kcal)} kcal · 蛋白 ${n1(f.p)} · 脂肪 ${n1(f.f)} · 碳水 ${n1(f.c)} · 纤维 ${n1(f.fib)} · 单餐上限 ${capText(f)}</div>
+  <div class="chips" style="margin-top:6px"><button class="chip" data-act="planCapEdit" data-fid="${f.id}">分配 ${dayText(f)} · ≤${planSplitOf(f)}餐 ✎</button></div></div></div>`).join('');
+}
+function planListHTML(q){
+  const list=db.foods.filter(f=>!q||f.name.includes(q)).sort((a,b)=>a.name.localeCompare(b.name,'zh'));
+  if(!list.length)return'<div class="empty">没有匹配的食物</div>';
+  return list.map(f=>{
+    const on=planSel[f.id]!=null,s=planSel[f.id];
+    const g=on?planGrams(f.id):0,n=on?foodNutr(f,g):null;
+    const units=planUnitOpts(f);
+    return`<div class="item"><input type="checkbox" data-chg="planChk" data-fid="${f.id}" ${on?'checked':''} style="flex:0 0 auto;width:22px;height:22px;align-self:flex-start;margin-top:4px">
+    <div class="grow"><div class="iname">${esc(f.name)}</div><div class="isub">${baseLabel(f)}：${n1(f.kcal)} kcal · 蛋白 ${n1(f.p)} · 脂肪 ${n1(f.f)} · 碳水 ${n1(f.c)} · 纤维 ${n1(f.fib)}</div>
+    ${on?`<div class="row" style="margin-top:6px"><input type="number" inputmode="decimal" min="0" value="${n1(s.q)}" data-inp="planQty" data-fid="${f.id}" style="flex:0 0 72px"><select data-chg="planUnit" data-fid="${f.id}" style="flex:0 0 84px">${units.map(u=>`<option ${u.name===s.u?'selected':''}>${esc(u.name)}</option>`).join('')}</select><span class="hint" style="align-self:center">= ${n1(g)} g</span></div>
+    <div class="isub" id="planCalc_${f.id}" style="color:var(--text)">→ <b>${Math.round(n.kcal)}</b> kcal · 蛋白 ${n1(n.p)} · 脂肪 ${n1(n.f)} · 碳水 ${n1(n.c)} · 纤维 ${n1(n.fib)}</div>
+    <div class="chips" style="margin-top:6px"><button class="chip" data-act="planCapEdit" data-fid="${f.id}">分配 ${dayText(f)} · ≤${planSplitOf(f)}餐 ✎</button></div>`:''}</div>
+    </div>`;
+  }).join('');
+}
+function planSum(){
+  const el=$('#planSum');if(!el)return;
+  if(planSrc==='all'){
+    const n=db.foods.filter(f=>f.stock!=null&&f.stock>0&&f.cat!=='sup').length;
+    el.innerHTML=`<div class="hint" style="font-size:14px;color:var(--text)">整库模式 · 可用 ${n} 种（有库存）</div>
+    <button class="btn" style="margin-top:8px" data-act="planGen">${n?'生成建议':'（请先给食物填库存）'}</button>`;
+    return;
+  }
+  const items=planItems(),tot=items.reduce((a,x)=>({kcal:a.kcal+x.n.kcal,p:a.p+x.n.p,f:a.f+x.n.f,c:a.c+x.n.c,fib:a.fib+x.n.fib}),{kcal:0,p:0,f:0,c:0,fib:0});
+  el.innerHTML=`<div class="hint" style="font-size:14px;color:var(--text)">已选 ${items.length} 项 · 合计 <b>${Math.round(tot.kcal)}</b> kcal · 蛋白 ${n1(tot.p)} · 脂肪 ${n1(tot.f)} · 碳水 ${n1(tot.c)} · 纤维 ${n1(tot.fib)}</div>
+  <button class="btn" style="margin-top:8px" data-act="planGen">${items.length?'生成建议':'请先勾选食材并填写数量'}</button>`;
+}
+/* 把一样食物的总量分到各餐（第 27 轮重写，第 28 轮修"自定义单位不能对半分"）：
+   · 有自定义单位且总量正好是整数个单位的（如 2 个鸡蛋、2 盒牛奶）：按"整个单位"分，
+     绝不出现半个/四分之一个单位；只有 1 个单位就不拆，单位不够拆几餐就少拆几餐
+   · 总量不是整数个单位的（如 300g 米饭而单位是"碗=200g"）：按克均分（食材本身可称重）
+   · 拆几餐 = 该食物的「最多分几餐」（默认 2＝对半分），只排某一餐时不拆
+   · 各份"对半分"（尽量均分），大的那份给缺口更大的餐
+   · 单餐上限是不超过的硬上限：总量超过"上限×餐数"就按此下调并提示
+   · 单日上限先截断（超出部分不进建议，结果页提示）；按单位计时也向下取整到整个单位
+   · 极小量（每份不足 10g，如补剂）不拆 */
+function planDistribute(p,meals){
+  const f=p.f,cap=planCapOf(f),M=cap.M,T=cap.T,perMax=M+T,D=planDayOf(f);
+  const uMin=planMinUnit(f); // 最小自定义单位（克）；0=没有
+  const byUnit=uMin>0&&Math.abs(p.g/uMin-Math.round(p.g/uMin))<0.001&&Math.round(p.g/uMin)>=1; // 原量是整数个单位
+  let G=+p.g.toFixed(2);
+  if(D>0&&G>D){
+    let used=D;
+    if(byUnit)used=Math.floor(D/uMin)*uMin; // 按单位计 → 单日上限也取整到整个单位
+    planNotes.push({name:f.name,why:'day',filled:G,used:used,cap:D});
+    G=used;
+  }
+  if(!(G>0.5))return;
+  let n=Math.max(1,Math.min(planSplitOf(f),meals.length));
+  const sizes=[];
+  if(byUnit){
+    let cnt=Math.round(G/uMin);          // 一共几个单位
+    if(cnt<n)n=cnt;                      // 单位不够拆这么多餐
+    if(cnt<2)n=1;                        // 只有 1 个单位 → 整份放一餐
+    if(n>1&&perMax>0){
+      const perMeal=Math.max(1,Math.floor(perMax/uMin)); // 每餐最多几个单位
+      if(cnt>perMeal*n){
+        const cut=+(cnt*uMin).toFixed(1);cnt=perMeal*n;G=+(cnt*uMin).toFixed(1);
+        planNotes.push({name:f.name,why:'meal',filled:cut,used:G,M,T,n});
+      }
+    }
+    const base=Math.floor(cnt/n),rem=cnt-base*n;
+    for(let i=0;i<n;i++)sizes.push((base+(i<rem?1:0))*uMin);
+  }else{
+    if(perMax>0&&G>perMax*n+0.05){
+      const cut=+G.toFixed(1);G=+(perMax*n).toFixed(1);
+      planNotes.push({name:f.name,why:'meal',filled:cut,used:G,M,T,n});
+    }
+    G=+G.toFixed(1);
+    if(!(G>0.5))return;
+    if(G/n<10)n=1; // 太小就不拆
+    const base=+(G/n).toFixed(1);
+    for(let i=0;i<n-1;i++)sizes.push(base);
+    sizes.push(+(G-base*(n-1)).toFixed(1));
+  }
+  sizes.sort((a,b)=>b-a);
+  const order=meals.map((m,i)=>({m,i,d:m.target-m.kcal})).sort((a,b)=>b.d-a.d).slice(0,sizes.length);
+  order.forEach((o,k)=>{
+    const g=sizes[k];if(!(g>0))return;
+    let u='g',q=g;
+    if(Math.abs(g-G)<0.05&&Math.abs(G-p.g)<0.05){u=p.u;q=p.q} // 未动过的整份 → 保留用户填写的单位
+    else{ // 正好是整数个单位就用单位表示（如"1个""2碗"），否则按克
+      const us=planUnits(f).find(x=>x.name!=='g'&&x.name!=='克'&&x.g>0&&Math.abs(g/x.g-Math.round(g/x.g))<0.02&&Math.round(g/x.g)>=1);
+      if(us){q=Math.round(g/us.g);u=us.name}
+    }
+    const nut=foodNutr(f,g);
+    o.m.items.push({f,g,n:nut,q,u});
+    o.m.kcal+=nut.kcal;
+  });
+}
+function planGen(){
+  const rem=planRemain();
+  planRem=rem;planNotes=[];
+  const meals=planMealKeys().map(k=>({k,share:planShareOf(k),target:rem.kcal*planShareOf(k),items:[],kcal:0}));
+  let picks=[];
+  if(planSrc==='all'){
+    const pool=db.foods.filter(f=>f.stock!=null&&f.stock>0&&f.cat!=='sup'&&(f.kcal>0||f.p>0||f.c>0))
+      .sort((a,b)=>planDens(b,'p')-planDens(a,'p'));
+    if(!pool.length)return toast('食物库里还没有填过"现有库存"的食物');
+    let gp=rem.p,gk=rem.kcal,used=0;
+    for(const f of pool){
+      if(used>=14)break;
+      if(gk<=60&&gp<=5)break; // 缺口基本补上就停：凑够即止，不追求把整库都排上
+      const cap=planCapOf(f),pd=planDens(f,'p'),kd=planDens(f,'kcal'),D=planDayOf(f);
+      const nSp=Math.max(1,Math.min(planSplitOf(f),meals.length));
+      const mealC=(cap.M+cap.T)*nSp; // 该食物一天最多能放下多少（单餐上限 × 可拆餐数）
+      let want=gp>3&&pd>=0.08?gp/pd:(kd>0?gk/kd:0); // 蛋白缺口大 → 优先拿高蛋白食物补蛋白，否则按热量缺口反推
+      want=Math.min(want,f.stock,mealC,D>0?D:Infinity); // 库存 / 单餐上限×餐数 / 单日上限
+      if(!(want>=5))continue;
+      picks.push({f,g:+want.toFixed(1),q:+want.toFixed(1),u:'g'}); // 单位"g"时 q 即克数（与记录/选择器口径一致）
+      const n=foodNutr(f,want);
+      gp-=n.p;gk-=n.kcal;used++;
+    }
+    if(!picks.length)return toast(gk<=60&&gp<=5?'今日剩余缺口已经很小，不用再安排食物':'按当前缺口与库存算不出合适的量，可先给食物填库存');
+  }else{
+    picks=planItems().map(x=>({f:x.f,g:x.g,q:x.q,u:x.u}));
+    if(!picks.length)return toast('请先勾选食材并填写数量');
+  }
+  picks.forEach(p=>planDistribute(p,meals));
+  planCache=meals;
+  renderPlanResult();
+}
+/* ---------- 建议结果页：可手动改数量/单位、删项、给某餐加食物 ---------- */
+function planSubHTML(m){
+  const s={p:0,f:0,c:0,fib:0};
+  m.items.forEach(x=>{s.p+=x.n.p;s.f+=x.n.f;s.c+=x.n.c;s.fib+=(x.n.fib||0)});
+  return `小计：蛋白 ${n1(s.p)} · 脂肪 ${n1(s.f)} · 碳水 ${n1(s.c)} · 纤维 ${n1(s.fib)}`;
+}
+function planResultTotals(){
+  const tot={kcal:0,p:0,f:0,c:0,fib:0};
+  (planCache||[]).forEach(m=>{
+    m.kcal=m.items.reduce((a,x)=>a+(x.n.kcal||0),0);
+    for(const x of m.items){tot.kcal+=x.n.kcal;tot.p+=x.n.p;tot.f+=x.n.f;tot.c+=x.n.c;tot.fib+=(x.n.fib||0)}
+  });
+  return tot;
+}
+function planSumHTML(){
+  const tot=planResultTotals(),rem=planRem||planRemain(),diff=Math.round(tot.kcal-rem.kcal);
+  return `合计 <b>${Math.round(tot.kcal)}</b> kcal（蛋白 ${n1(tot.p)} · 脂肪 ${n1(tot.f)} · 碳水 ${n1(tot.c)} · 纤维 ${n1(tot.fib)}）；今日还需 ${Math.round(rem.kcal)} kcal <b style="color:${diff>0?'var(--warn)':'var(--pri)'}">${diff>0?`超出 ${diff} kcal`:`尚缺 ${-diff} kcal`}</b>`;
+}
+function planItemHTML(m,x,i){
+  const units=planUnitOpts(x.f);
+  return `<div class="item" data-drag="${m.k}|${i}"><div class="grow"><div class="iname"><span class="grip" title="长按拖动到别的餐">⠿</span>${esc(x.f.name)} <span class="hint" id="plAmt_${m.k}_${i}">${x.u==='g'?n1(x.g)+'g':n1(x.q)+esc(x.u)+'（'+n1(x.g)+'g）'}</span></div>
+  <div class="row" style="margin-top:4px"><input type="number" inputmode="decimal" min="0" value="${n1(x.q)}" data-inp="planRQ" data-meal="${m.k}" data-i="${i}" style="flex:0 0 72px"><select data-chg="planRUnit" data-meal="${m.k}" data-i="${i}" style="flex:0 0 84px">${units.map(u=>`<option ${u.name===x.u?'selected':''}>${esc(u.name)}</option>`).join('')}</select><button class="del" data-act="planRDel" data-meal="${m.k}" data-i="${i}">✕</button></div>
+  <div class="isub" id="plCalc_${m.k}_${i}">${planCalcHTML(x,planWarnHTML(x.f.id))}</div></div></div>`;
+}
+/* 某食物的"全天合计"与单日上限对照：生成时已按上限截断，手动改超了在这里提醒 */
+function planWarnHTML(fid){
+  const f=foodById(fid);if(!f)return'';
+  const D=planDayOf(f);if(!(D>0))return'';
+  let used=0;(planCache||[]).forEach(m=>m.items.forEach(x=>{if(x.f.id===fid)used+=x.g}));
+  return used>D+0.05?` <span style="color:var(--warn)">⚠️ 全天合计 ${n1(used)}g，已超单日上限 ${n1(D)}g</span>`:'';
+}
+function planCalcHTML(x,warn){
+  return `蛋白 <b style="color:var(--cP)">${n1(x.n.p)}</b> · 脂肪 <b style="color:var(--cF)">${n1(x.n.f)}</b> · 碳水 <b style="color:var(--cC)">${n1(x.n.c)}</b> · 纤维 ${n1(x.n.fib||0)} · ${Math.round(x.n.kcal)} kcal${warn||''}`;
+}
+function planRefreshFoodWarn(fid){
+  const w=planWarnHTML(fid);
+  (planCache||[]).forEach(m=>m.items.forEach((x,i)=>{
+    if(x.f.id!==fid)return;
+    const el=document.getElementById('plCalc_'+m.k+'_'+i);
+    if(el)el.innerHTML=planCalcHTML(x,w);
+  }));
+}
+function planAddRowHTML(m){
+  return `<div class="row" style="margin-top:8px"><select id="plAddF_${m.k}" data-chg="planRAddFood" data-meal="${m.k}">${db.foods.map(f=>`<option value="${f.id}">${esc(f.name)}</option>`).join('')}</select><input id="plAddQ_${m.k}" type="number" inputmode="decimal" value="100" style="flex:0 0 64px"><select id="plAddU_${m.k}" style="flex:0 0 76px"></select><button class="addbtn" style="flex:0 0 auto" data-act="planRAdd" data-meal="${m.k}">＋</button></div>`;
+}
+function planAddRowFill(meal){
+  const sel=$('#plAddF_'+meal),us=$('#plAddU_'+meal),q=$('#plAddQ_'+meal);
+  if(!sel||!us)return;
+  const f=foodById(sel.value),units=f?planUnitOpts(f):[{name:'g',g:1}];
+  us.innerHTML=units.map(u=>`<option>${esc(u.name)}</option>`).join('');
+  if(q){const u0=units[0];q.value=(u0.name==='g'||u0.name==='克')?100:1}
+}
+/* 项上的单位名若已不在食物的单位表里（单位被改名/删除）→ 回落到克，保证下拉框显示与实际计算一致 */
+function planNormUnits(){
+  (planCache||[]).forEach(m=>m.items.forEach(x=>{
+    if(planUnitOpts(x.f).some(u=>u.name===x.u))return;
+    x.u='g';x.q=+x.g.toFixed(2);x.n=foodNutr(x.f,x.g);
+  }));
+}
+function renderPlanResult(){
+  planNormUnits();
+  const splitNote=(planSrc==='all'?'用量由今日缺口反推（优先补蛋白，库存/单日上限/单餐上限为界），凑够即止。':'按你填写的数量分配；超过上限的按上限截断。')+'每种食材最多拆到它的「最多分几餐」（默认 2 餐＝对半分），单餐上限不会被突破。';
+  let html=`<div class="card"><div class="mhead"><span>🍽️ 建议（${planMode==='one'?'只排'+MEAL_NAMES[planOneMeal]:'全天三餐'}）</span></div>
+  <div class="warn-box" style="margin:0 0 8px;font-size:12px">🧪 仅测试功能：结果可能不稳定，请核对后再加入记录。</div>
+  <div class="hint" id="plSum">${planSumHTML()}</div>`;
+  if(planNotes.length)html+=planNotes.map(n=>`<div class="hint" style="color:var(--warn)">⚠️ ${esc(n.name)}：${n.why==='meal'
+    ?`单餐上限 ${n1(n.M)}±${n1(n.T)}g × 最多 ${n.n} 餐 → 一天最多安排 ${n1(n.used)}g（原计划 ${n1(n.filled)}g），已下调`
+    :`计划量 ${n1(n.filled)}g 超过单日上限 ${n1(n.cap)}g，已按上限 ${n1(n.used)}g 纳入`}（点食材旁的「分配」可调整）</div>`).join('');
+  html+=`<div class="hint">${splitNote}<br>下方可直接改数量/单位、删掉某项，或给某一餐加食物；<b>长按某一项（约半秒）可拖到别的餐</b>，合计实时更新。</div></div>`;
+  (planCache||[]).forEach(m=>{
+    html+=`<div class="card" id="plCard_${m.k}" data-mealk="${m.k}"><div class="mhead"><span>${MEAL_ICON[m.k]} ${MEAL_NAMES[m.k]}</span><span class="mcal" id="plMcal_${m.k}">${Math.round(m.kcal)} / ${Math.round(m.target)} kcal</span></div>`;
+    html+=m.items.length?m.items.map((x,i)=>planItemHTML(m,x,i)).join(''):'<div class="empty">这一餐没有分配到食材</div>';
+    html+=`<div class="hint" id="plSub_${m.k}">${planSubHTML(m)}</div>`;
+    html+=planAddRowHTML(m);
+    if(m.items.length)html+=`<button class="btn ghost small" style="margin-top:6px" data-act="planAdd" data-meal="${m.k}">把${MEAL_NAMES[m.k]}加入记录</button>`;
+    html+=`</div>`;
+  });
+  html+=`<button class="btn" data-act="planGen">🔄 重新生成</button><button class="btn ghost" data-act="planBack">← 返回修改食材</button>`;
+  $('#shTitle').textContent='今天吃什么 · 建议';
+  $('#shBody').innerHTML=html;
+  (planCache||[]).forEach(m=>planAddRowFill(m.k));
+}
+/* 改数量/单位后只更新对应行、小计与合计（不整页重渲染，避免输入框失焦） */
+function planEditItem(meal,i){
+  const m=(planCache||[]).find(x=>x.k===meal);if(!m)return;
+  const x=m.items[i];if(!x)return;
+  const g=+(x.q*planUnitG(x.f,x.u)).toFixed(2);
+  x.g=g;x.n=foodNutr(x.f,g);
+  const amt=document.getElementById('plAmt_'+meal+'_'+i);
+  if(amt)amt.textContent=x.u==='g'?n1(g)+'g':n1(x.q)+x.u+'（'+n1(g)+'g）';
+  planRefreshFoodWarn(x.f.id);
+  const sum=document.getElementById('plSum');if(sum)sum.innerHTML=planSumHTML();
+  const sub=document.getElementById('plSub_'+meal);if(sub)sub.textContent=planSubHTML(m);
+  const mc=document.getElementById('plMcal_'+meal);if(mc)mc.textContent=`${Math.round(m.kcal)} / ${Math.round(m.target)} kcal`;
+}
+/* ---------- 建议页：长按（约 0.4 秒）把某一项拖到别的餐（触屏与鼠标都支持） ---------- */
+let dragSt=null,dragTimer=null,dragScrollT=null;
+function dragXY(e){const t=e.touches?e.touches[0]:e;return{x:t.clientX,y:t.clientY}}
+function dragStopScroll(){if(dragScrollT){clearInterval(dragScrollT);dragScrollT=null}}
+function dragClean(){
+  dragStopScroll();
+  document.querySelectorAll('.item.dragging').forEach(el=>el.classList.remove('dragging'));
+  document.querySelectorAll('.card.droptar').forEach(el=>el.classList.remove('droptar'));
+  const g=document.getElementById('dragGhost');if(g)g.remove();
+}
+function dragCancel(){
+  if(dragTimer){clearTimeout(dragTimer);dragTimer=null}
+  dragSt=null;dragClean();
+}
+function dragArm(el,x,y){
+  dragCancel();
+  const parts=String(el.dataset.drag||'').split('|');
+  dragSt={el,meal:parts[0],i:+parts[1],x0:x,y0:y,active:false};
+  dragTimer=setTimeout(dragLift,400);
+}
+function dragLift(){
+  dragTimer=null;const s=dragSt;if(!s)return;
+  s.active=true;s.el.classList.add('dragging');
+  const m=(planCache||[]).find(x=>x.k===s.meal),it=m?m.items[s.i]:null;
+  const g=document.createElement('div');g.id='dragGhost';
+  g.textContent=(it?it.f.name+' '+n1(it.g)+'g · ':'')+'拖到某一餐后松手';
+  document.body.appendChild(g);
+  dragMove(s.x0,s.y0);
+  try{if(navigator.vibrate)navigator.vibrate(12)}catch(e){}
+}
+function dragMove(x,y){
+  const s=dragSt;if(!s||!s.active)return;
+  s.x=x;s.y=y;
+  const g=document.getElementById('dragGhost');
+  if(g)g.style.transform='translate('+(x+10)+'px,'+(y-18)+'px)';
+  const el=document.elementFromPoint(x,y);
+  const card=el&&el.closest?el.closest('#shBody .card[data-mealk]'):null;
+  document.querySelectorAll('#shBody .card.droptar').forEach(c=>{if(c!==card)c.classList.remove('droptar')});
+  if(card)card.classList.add('droptar');
+  dragAutoScroll(y);
+}
+/* 拖到弹层上/下边缘附近时自动滚动，方便把食材拖到屏幕外的餐 */
+function dragAutoScroll(y){
+  const sb=document.getElementById('shBody');if(!sb)return;
+  const r=sb.getBoundingClientRect();
+  if(y<r.top+70)dragScrollRun(-14);
+  else if(y>r.bottom-70)dragScrollRun(14);
+  else dragStopScroll();
+}
+function dragScrollRun(dy){
+  if(dragScrollT)return;
+  dragScrollT=setInterval(()=>{
+    const sb=document.getElementById('shBody');
+    if(!sb||!dragSt||!dragSt.active){dragStopScroll();return}
+    sb.scrollTop+=dy;
+    dragMove(dragSt.x,dragSt.y);
+  },60);
+}
+function dragDrop(){
+  const s=dragSt;if(!s)return;
+  const active=s.active,from=s.meal,idx=s.i;
+  const card=active?document.querySelector('#shBody .card.droptar'):null;
+  const to=card?card.dataset.mealk:null;
+  dragCancel();
+  if(!active||!to||to===from)return;
+  const src=(planCache||[]).find(x=>x.k===from),dst=(planCache||[]).find(x=>x.k===to);
+  if(!src||!dst)return;
+  const it=src.items[idx];if(!it)return;
+  src.items.splice(idx,1);
+  const same=dst.items.find(x=>x.f.id===it.f.id); // 目标餐已有同一食材 → 合并成一项
+  if(same){
+    same.g=+(same.g+it.g).toFixed(1);same.n=foodNutr(same.f,same.g);
+    const us=planUnits(same.f).find(u=>u.name!=='g'&&u.name!=='克'&&u.g>0&&Math.abs(same.g/u.g-Math.round(same.g/u.g))<0.02);
+    if(us){same.q=Math.round(same.g/us.g);same.u=us.name}else{same.q=same.g;same.u='g'}
+    toast('✅ 已把 '+it.f.name+' 并入'+MEAL_NAMES[to]+'（合计 '+n1(same.g)+'g）');
+  }else{
+    dst.items.push(it);
+    toast('✅ 已把 '+it.f.name+' '+n1(it.g)+'g 移到'+MEAL_NAMES[to]);
+  }
+  renderPlanResult();
+}
+(function bindPlanDrag(){
+  const start=e=>{
+    if(!e.target.closest)return;
+    const el=e.target.closest('#shBody [data-drag]');
+    if(!el)return;
+    if(e.target.closest('input,select,button,a'))return; // 在控件上操作时不启动拖拽
+    const p=dragXY(e);dragArm(el,p.x,p.y);
+  };
+  const move=e=>{
+    if(!dragSt)return;
+    const p=dragXY(e);
+    if(!dragSt.active){
+      if(Math.abs(p.x-dragSt.x0)>10||Math.abs(p.y-dragSt.y0)>10)dragCancel(); // 先移动了 → 当作滚动
+      return;
+    }
+    if(e.cancelable)e.preventDefault();
+    dragMove(p.x,p.y);
+  };
+  const end=()=>{if(dragSt)dragDrop()};
+  document.addEventListener('touchstart',start,{passive:true});
+  document.addEventListener('touchmove',move,{passive:false});
+  document.addEventListener('touchend',end);
+  document.addEventListener('touchcancel',()=>dragCancel());
+  document.addEventListener('mousedown',start);
+  document.addEventListener('mousemove',move);
+  document.addEventListener('mouseup',end);
+})();
+function readMicro(){
+  const m={};
+  for(const it of MICRO_ALL){const v=num('fId_'+it.key);if(v>0)m[it.key]=v}
+  return m;
+}
+/* ---------- 餐组合 ---------- */
+let cbDraft=null;
+function comboTot(c){
+  const t={kcal:0,p:0};
+  for(const it of c.items){const f=foodById(it.fid);if(!f)continue;t.kcal+=f.kcal*it.g/100;t.p+=f.p*it.g/100}
+  return t;
+}
+function openComboManage(){
+  let html=`<button class="btn" style="margin-bottom:10px" data-act="openComboEdit" data-id="">＋ 新建组合</button>`;
+  if(!db.combos.length)html+=`<div class="empty">还没有组合。把常吃的一餐（如燕麦+鸡蛋+牛奶）存成组合，饮食页可一键添加整餐</div>`;
+  db.combos.forEach(c=>{
+    const t=comboTot(c);
+    html+=`<div class="item"><div class="grow"><div class="iname">${esc(c.name)}</div><div class="isub">${c.items.length} 项 · ${n1(t.kcal)} kcal · 蛋白 ${n1(t.p)}g</div></div><button class="del" data-act="openComboEdit" data-id="${c.id}">编辑</button><button class="del" data-act="delCombo" data-id="${c.id}">✕</button></div>`;
+  });
+  openSheet('餐组合管理',html);
+}
+function openComboEdit(id){
+  if(id){const c=db.combos.find(x=>x.id===id);cbDraft=c?{id:c.id,name:c.name,items:c.items.map(x=>Object.assign({},x))}:{id:'',name:'',items:[]}}
+  else cbDraft={id:'',name:'',items:[]};
+  renderComboSheet();
+}
+function renderComboSheet(){
+  let html=`<label>组合名称</label><input id="cbName" value="${esc(cbDraft.name)}" placeholder="如：增肌早餐">`;
+  html+=`<div class="sec-title" style="margin-top:12px">组合内容</div>`;
+  html+=cbDraft.items.length?cbDraft.items.map((it,i)=>`<div class="item"><div class="grow"><div class="iname">${esc(it.name)}</div><div class="isub">${n1(it.qty)} ${esc(it.unit)}（${n1(it.g)}g）</div></div><button class="del" data-act="cbDelItem" data-i="${i}">✕</button></div>`).join(''):`<div class="empty">还没有条目，在下面选食物加入</div>`;
+  html+=`<div class="row" style="margin-top:8px"><select id="cbFood" data-chg="cbFood">${db.foods.map(f=>`<option value="${f.id}">${esc(f.name)}</option>`).join('')}</select></div>
+  <div class="row"><input id="cbQty" type="number" inputmode="decimal" value="100" placeholder="数量"><select id="cbUnit"></select></div>
+  <button class="btn" style="margin-top:10px" data-act="cbAddItem">＋ 加入组合</button>
+  <button class="btn ghost" style="margin-top:8px" data-act="saveCombo">保存组合</button>`;
+  openSheet(cbDraft.id?'编辑组合':'新建组合',html);
+  cbUnitFill();
+}
+function cbUnitFill(){
+  const f=foodById($('#cbFood').value);if(!f)return;
+  const units=f.units&&f.units.length?f.units:[{name:'g',g:1}];
+  $('#cbUnit').innerHTML=units.map(u=>`<option>${esc(u.name)}</option>`).join('');
+}
+function comboToMeal(id){
+  const c=db.combos.find(x=>x.id===id);if(!c)return;
+  let html=`<div class="hint">「${esc(c.name)}」共 ${c.items.length} 项，添加到：</div><div class="chips" style="margin:12px 0">`;
+  for(const k in MEAL_NAMES)html+=`<button class="chip" data-act="comboTo" data-id="${id}" data-meal="${k}">${MEAL_NAMES[k]}</button>`;
+  html+=`</div>`;
+  openSheet('添加组合',html);
+}
+
+/* ---------- 运动弹层 ---------- */
+function openEx(idx){
+  const log=ensureLog(cur),e=idx!=null?log.exercises[idx]:null;
+  const html=`<label>运动名称</label><input id="exName" list="metList" value="${esc(e?e.name:'')}" placeholder="选择或输入" data-inp="exCalc">
+  <datalist id="metList">${METS.map(m=>`<option value="${m[0]}">`).join('')}</datalist>
+  <div class="row"><div><label>时长(分钟)</label><input id="exMin" type="number" inputmode="decimal" value="${e?e.min:60}" data-inp="exCalc"></div><div><label>MET 强度</label><input id="exMet" type="number" inputmode="decimal" value="${e?n1(e.met):''}" data-inp="exCalc"></div></div>
+  <label>消耗热量 kcal（自动算，可手改）</label><input id="exKcal" type="number" inputmode="decimal" value="${e?n1(e.kcal):''}" data-inp="exKcal">
+  <div class="sec-title">训练容量（可选，三项都填才计入）</div>
+  <div class="row"><div><label>组数</label><input id="exSets" type="number" inputmode="decimal" value="${e&&e.sets?e.sets:''}"></div><div><label>次数/组</label><input id="exReps" type="number" inputmode="decimal" value="${e&&e.reps?e.reps:''}"></div><div><label>重量 kg</label><input id="exW" type="number" inputmode="decimal" value="${e&&e.weight?e.weight:''}"></div></div>
+  <div class="hint">容量 = 组数 × 次数 × 重量（kg）</div>
+  <button class="btn" style="margin-top:12px" data-act="saveEx" data-idx="${idx!=null?idx:''}">保存</button>`;
+  openSheet(idx!=null?'编辑运动':'添加运动',html);
+  exCalc();
+}
+function exCalc(){
+  const name=val('exName'),m=METS.find(x=>x[0]===name);
+  if(m&&!$('#exMet').value)$('#exMet').value=m[1];
+  const met=num('exMet'),min=num('exMin'),w=db.profile.weight||0,kc=$('#exKcal');
+  if(met&&min&&w&&kc.dataset.lock!=='1')kc.value=n1(met*w*min/60);
+}
+/* ---------- Canvas 图表 ---------- */
+function setupCv(cv,h){
+  const w=cv.clientWidth;
+  if(!(w>0))return null; // 页面隐藏/未布局时宽度为 0，跳过绘制（切回该页时会重绘）
+  const dpr=window.devicePixelRatio||1;
+  cv.style.height=h+'px';
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,w,h);
+  return{ctx,w,h};
+}
+function drawDonut(){
+  const cv=$('#cvDonut');if(!cv)return;
+  const o=setupCv(cv,190);if(!o)return;
+  const ctx=o.ctx,w=o.w,h=o.h;
+  const s=sumDay(cur),t=dayTarget(cur);
+  const segs=[{v:s.p,color:cssVar('--cP')},{v:s.f,color:cssVar('--cF')},{v:s.c,color:cssVar('--cC')}];
+  const tot=segs.reduce((a,x)=>a+x.v,0);
+  const cx=w/2,cy=h/2-4,r=Math.max(12,Math.min(w,h)/2-16),lw=r*0.36;
+  if(tot<=0){
+    ctx.strokeStyle=cssVar('--bar');ctx.lineWidth=lw;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();
+      ctx.fillStyle=cssVar('--sub');ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('还没有供能记录',cx,cy+4);
+    return;
+  }
+  let a=-Math.PI/2;
+  ctx.lineWidth=lw;ctx.lineCap='butt';
+  for(const g of segs){
+    const span=g.v/tot*Math.PI*2;if(span<=0)continue;
+    ctx.strokeStyle=g.color;ctx.beginPath();ctx.arc(cx,cy,r,a+0.02,Math.max(a+span-0.02,a+0.03));ctx.stroke();a+=span;
+  }
+  const left=t.kcal+(db.profile.countExercise?s.ex:0)-s.kcal;
+  ctx.textAlign='center';
+  ctx.fillStyle=cssVar('--sub');ctx.font='12px sans-serif';ctx.fillText('还可以吃',cx,cy-6);
+  ctx.fillStyle=left<0?cssVar('--danger'):cssVar('--text');ctx.font='bold 24px sans-serif';ctx.fillText(n1(left)+' kcal',cx,cy+22);
+}
+function lineChart(cv,cfg){
+  const o=setupCv(cv,cfg.h||250);if(!o)return;
+  const ctx=o.ctx,w=o.w,h=o.h;
+  const padL=40,padR=cfg.axisR?40:12,padT=14,padB=26,W=w-padL-padR,H=h-padT-padB;
+  let xmin=Infinity,xmax=-Infinity;
+  for(const se of cfg.series)for(const p of se.data){xmin=Math.min(xmin,p.x);xmax=Math.max(xmax,p.x)}
+  if(!isFinite(xmin)){ctx.fillStyle=cssVar('--sub');ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('暂无数据',w/2,h/2);return}
+  const xf=v=>padL+(v-xmin)/(xmax-xmin||1)*W;
+  let ymin=Infinity,ymax=-Infinity,yminR=Infinity,ymaxR=-Infinity;
+  for(const se of cfg.series)if(se.data.length)for(const p of se.data){
+    if(se.axis==='R'){yminR=Math.min(yminR,p.y);ymaxR=Math.max(ymaxR,p.y)}
+    else{ymin=Math.min(ymin,p.y);ymax=Math.max(ymax,p.y)}
+  }
+  const nice=(lo,hi)=>{
+    if(!isFinite(lo))return[];
+    if(hi-lo<1e-9){lo-=1;hi+=1}
+    const r=hi-lo,p=Math.pow(10,Math.floor(Math.log10(r||1))),arr=[];
+    for(let v=Math.ceil(lo/p)*p;v<=hi;v+=p/2)arr.push(v);
+    return arr.slice(0,7);
+  };
+  const yf=v=>padT+H-(v-ymin)/(ymax-ymin||1)*H,yfR=v=>padT+H-(v-yminR)/(ymaxR-yminR||1)*H;
+  ctx.strokeStyle=cssVar('--line');ctx.fillStyle=cssVar('--sub');ctx.font='10px sans-serif';ctx.lineWidth=1;
+  for(const g of nice(ymin,ymax)){const y=yf(g);ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(w-padR,y);ctx.stroke();ctx.textAlign='right';ctx.fillText(n1(g),padL-4,y+3)}
+  if(cfg.axisR){ctx.fillStyle=cfg.axisR.color;for(const g of nice(yminR,ymaxR)){ctx.textAlign='left';ctx.fillText(n1(g),w-padR+4,yfR(g)+3)}ctx.fillStyle=cssVar('--sub')}
+  const xs=[...new Set(cfg.series.flatMap(se=>se.data.map(p=>p.x)))].sort((a,b)=>a-b);
+  const step=Math.max(1,Math.ceil(xs.length/6));
+  ctx.textAlign='center';
+  xs.forEach((x,i)=>{if(i%step)return;const d=new Date(x);ctx.fillText((d.getMonth()+1)+'/'+d.getDate(),xf(x),h-padB+14)});
+  ctx.save();ctx.beginPath();ctx.rect(padL,padT,W,H);ctx.clip();
+  for(const se of cfg.series){
+    if(se.hide||!se.data.length)continue;
+    ctx.strokeStyle=se.color;ctx.lineWidth=se.dash?1.5:2;ctx.setLineDash(se.dash?[5,4]:[]);
+    ctx.beginPath();let first=true;
+    for(const p of se.data){const x=xf(p.x),y=se.axis==='R'?yfR(p.y):yf(p.y);first?ctx.moveTo(x,y):ctx.lineTo(x,y);first=false}
+    ctx.stroke();ctx.setLineDash([]);
+    if(se.data.length<25)for(const p of se.data){const x=xf(p.x),y=se.axis==='R'?yfR(p.y):yf(p.y);ctx.fillStyle=se.color;ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);ctx.fill()}
+  }
+  ctx.restore();
+  if(cfg.sel){
+    const se=cfg.series[cfg.sel.i],p=se.data[cfg.sel.j];
+    const x=xf(p.x),y=se.axis==='R'?yfR(p.y):yf(p.y);
+    ctx.strokeStyle=cssVar('--sub');ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(x,padT);ctx.lineTo(x,padT+H);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=se.color;ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();
+    const d=new Date(p.x),txt=`${(d.getMonth()+1)}/${d.getDate()} ${se.name} ${n1(p.y)}${se.unit||''}`;
+    ctx.font='12px sans-serif';const tw=ctx.measureText(txt).width+12;
+    let bx=x-tw/2;bx=Math.max(4,Math.min(bx,w-tw-4));
+    ctx.fillStyle='rgba(17,24,39,.85)';ctx.fillRect(bx,y-38,tw,22);
+    ctx.fillStyle='#fff';ctx.textAlign='left';ctx.fillText(txt,bx+6,y-23);
+  }
+}
+function maSeries(data){
+  const out=[];
+  for(let i=0;i<data.length;i++){
+    const sl=data.slice(Math.max(0,i-6),i+1);
+    out.push({x:data[i].x,y:+(sl.reduce((a,p)=>a+p.y,0)/sl.length).toFixed(1)});
+  }
+  return out;
+}
+
+/* ---------- 数据页 ---------- */
+function renderData(){
+  $('#pg-data').innerHTML=`<div class="subtabs"><button class="${subTab==='body'?'on':''}" data-act="subTab" data-s="body">身体记录</button><button class="${subTab==='trend'?'on':''}" data-act="subTab" data-s="trend">趋势</button><button class="${subTab==='cal'?'on':''}" data-act="subTab" data-s="cal">月历</button></div><div id="subBody"></div>`;
+  if(subTab==='body')renderBody();else if(subTab==='trend')renderTrend();else renderCal();
+}
+function renderBody(){
+  const box=$('#subBody'),d=todayStr();
+  const rec=db.body.find(x=>x.date===d);
+  let html=`<div class="card"><div class="mhead">📏 记录身体数据</div>
+  <label>日期</label><input id="bDate" type="date" value="${d}">
+  <div class="row"><div><label>体重 kg</label><input id="bW" type="number" inputmode="decimal" value="${rec&&rec.weight!=null?rec.weight:''}" placeholder="kg"></div><div><label>体脂率 %</label><input id="bBf" type="number" inputmode="decimal" value="${rec&&rec.bf!=null?rec.bf:''}" placeholder="%"></div></div>
+  ${db.metrics.map(m=>`<div class="row"><div><label>${esc(m.name)} cm</label><input id="bm_${m.key}" type="number" inputmode="decimal" value="${rec&&rec.m&&rec.m[m.key]!=null?rec.m[m.key]:''}" placeholder="cm"></div><div style="flex:1"></div></div>`).join('')}
+  <div class="row" style="margin-top:8px"><button class="btn ghost small" data-act="bPhoto">📷 添加/更换照片</button><img id="bPhotoPrev" class="photo-thumb" data-act="photoShow" src="${rec&&rec.photo?rec.photo:''}" style="${rec&&rec.photo?'':'display:none'}" alt="体态照片"><button class="del" id="bPhotoDelBtn" data-act="bPhotoDel" style="${rec&&rec.photo?'':'display:none'}">✕</button></div>
+  <div class="hint">每月至少记一次；照片自动压缩（约30-60KB），全库最多 12 张</div>
+  <button class="btn" style="margin-top:10px" data-act="saveBody">保存（同日重复保存 = 覆盖）</button></div>`;
+  const recs=db.body.slice().sort((a,b)=>b.date.localeCompare(a.date));
+  html+=`<div class="card"><div class="mhead">📋 历史记录</div>`+(recs.length?recs.map(r=>`<div class="item" data-act="bodyLoad" data-d="${r.date}"><div class="grow"><div class="iname">${r.date}${r.photo?' 📷':''}</div><div class="isub">${r.weight!=null?'体重 '+n1(r.weight)+'kg · ':''}${r.bf!=null?'体脂 '+n1(r.bf)+'% · ':''}${db.metrics.filter(m=>r.m&&r.m[m.key]!=null).map(m=>m.name+' '+n1(r.m[m.key])).join(' · ')}</div></div><button class="del" data-act="bodyDel" data-d="${r.date}">✕</button></div>`).join(''):`<div class="empty">还没有身体记录</div>`)+`</div>`;
+  box.innerHTML=html;
+  photoData=rec&&rec.photo?rec.photo:'';
+}
+function renderTrend(){
+  const box=$('#subBody');
+  if(!Object.keys(girthOn).length)db.metrics.slice(0,3).forEach(m=>girthOn[m.key]=true);
+  let html=`<div class="chips" style="margin-bottom:10px"><button class="chip ${trendMode==='wb'?'on':''}" data-act="trendMode" data-m="wb">体重+体脂</button><button class="chip ${trendMode==='girth'?'on':''}" data-act="trendMode" data-m="girth">围度</button></div>`;
+  html+=`<div class="range-row"><span style="font-size:13px;color:var(--sub)">范围</span>${['1m','3m','1y','all'].map(r=>`<button class="chip ${trendRange===r?'on':''}" data-act="trendRange" data-r="${r}">${r==='1m'?'1月':r==='3m'?'3月':r==='1y'?'1年':'全部'}</button>`).join('')}<label style="margin:0 0 0 6px;display:flex;align-items:center;gap:6px;font-size:13px;color:var(--sub)"><input type="checkbox" id="trendMA" ${trendMA?'checked':''} data-chg="trendMA">7日均线</label></div>`;
+  html+=`<div class="chips" style="margin-bottom:8px"><button class="chip ${trendTab==='chart'?'on':''}" data-act="trendTab" data-s="chart">📈 图表</button><button class="chip ${trendTab==='table'?'on':''}" data-act="trendTab" data-s="table">📋 表格</button></div>`;
+  if(trendTab==='table'){box.innerHTML=html+renderTrendTable();return}
+  html+=`<div class="card chart-box"><canvas id="cvTrend"></canvas></div>`;
+  html+=trendMode==='wb'?`<div class="legend"><span class="chip ${wbHide[0]?'off':''}" style="color:#3b82f6" data-act="togSeries" data-i="0">体重 kg</span><span class="chip ${wbHide[1]?'off':''}" style="color:#f59e0b" data-act="togSeries" data-i="1">体脂 %</span></div>`
+    :`<div class="legend">`+db.metrics.map(m=>`<span class="chip ${girthOn[m.key]===false?'off':''}" data-act="togGirth" data-k="${m.key}">${esc(m.name)}</span>`).join('')+`</div>`;
+  html+=`<div class="hint">在图上滑动可查看具体数值</div>`;
+  box.innerHTML=html;
+  requestAnimationFrame(drawTrend);
+  bindTrendTouch();
+}
+function trendRecs(){
+  let recs=db.body.slice();
+  if(trendRange!=='all'){
+    const days={ '1m':30,'3m':90,'1y':365}[trendRange];
+    const min=+new Date(addDays(todayStr(),-days)+'T12:00:00');
+    recs=recs.filter(r=>+new Date(r.date+'T12:00:00')>=min);
+  }
+  return recs;
+}
+function trendSeries(){
+  const recs=trendRecs(),toX=s=>+new Date(s+'T12:00:00');
+  if(trendMode==='wb')return[
+    {name:'体重',color:'#3b82f6',unit:'kg',hide:wbHide[0],data:recs.filter(r=>r.weight!=null).map(r=>({x:toX(r.date),y:r.weight}))},
+    {name:'体脂',color:'#f59e0b',unit:'%',axis:'R',hide:wbHide[1],data:recs.filter(r=>r.bf!=null).map(r=>({x:toX(r.date),y:r.bf}))}
+  ];
+  const colors=['#3b82f6','#f59e0b','#10b981','#ef4444','#8b5cf6','#06b6d4'];
+  return db.metrics.filter(m=>girthOn[m.key]!==false).map((m,i)=>({name:m.name,color:colors[i%6],unit:'cm',data:recs.filter(r=>r.m&&r.m[m.key]!=null).map(r=>({x:toX(r.date),y:r.m[m.key]}))}));
+}
+function drawTrend(){
+  const cv=$('#cvTrend');if(!cv)return;
+  const series=trendSeries();
+  if(trendMode==='wb'&&trendMA&&series[0].data.length>=3)series.push({name:'体重7日均线',color:'#3b82f6',unit:'kg',dash:1,hide:series[0].hide,data:maSeries(series[0].data)});
+  lineChart(cv,{series,axisR:trendMode==='wb'?{color:'#f59e0b'}:null,sel:trendSel,h:260});
+}
+function renderTrendTable(){
+  const recs=db.body.slice().sort((a,b)=>b.date.localeCompare(a.date));
+  if(!recs.length)return'<div class="card empty">暂无身体记录</div>';
+  let html=`<div class="card"><div class="tbl-wrap"><table class="data"><tr><th>日期</th><th>体重kg</th><th>体脂%</th>${db.metrics.map(m=>`<th>${esc(m.name)}cm</th>`).join('')}</tr>`;
+  for(const r of recs)html+=`<tr><td>${r.date.slice(5)}</td><td>${r.weight!=null?n1(r.weight):'—'}</td><td>${r.bf!=null?n1(r.bf):'—'}</td>${db.metrics.map(m=>`<td>${r.m&&r.m[m.key]!=null?n1(r.m[m.key]):'—'}</td>`).join('')}</tr>`;
+  return html+`</table></div></div>`;
+}
+function renderCal(){
+  const box=$('#subBody');
+  if(!calY){const d=new Date();calY=d.getFullYear();calM=d.getMonth()}
+  const first=new Date(calY,calM,1).getDay(),days=new Date(calY,calM+1,0).getDate(),t=todayStr();
+  let html=`<div class="cal-head"><button class="btn ghost small" data-act="calNav" data-d="-1">‹ 上月</button><b>${calY} 年 ${calM+1} 月</b><button class="btn ghost small" data-act="calNav" data-d="1">下月 ›</button></div>`;
+  html+=`<div class="cal-grid">${['一','二','三','四','五','六','日'].map(w=>`<div class="wd">${w}</div>`).join('')}`;
+  const offset=(first+6)%7;
+  for(let i=0;i<offset;i++)html+=`<div class="cal-cell out"></div>`;
+  let ok=0,total=0;
+  for(let d=1;d<=days;d++){
+    const ds=`${calY}-${pad(calM+1)}-${pad(d)}`;
+    const s=sumDay(ds),tt=dayTarget(ds);
+    const has=s.kcal>0,bodyRec=db.body.some(r=>r.date===ds);
+    let cls='';
+    if(has){const pct=tt.kcal>0?s.kcal/tt.kcal*100:0;cls=pctCls(pct);if(pct>=90&&pct<=110)ok++;total++}
+    html+=`<div class="cal-cell ${ds===t?'cur':''}" data-act="calDay" data-d="${ds}">${d}${has?`<div class="h ${cls}"></div>`:''}${bodyRec?'<div class="dot"></div>':''}</div>`;
+  }
+  html+=`</div><div class="cal-legend"><span><i style="background:#94a3b8"></i>不足50%</span><span><i style="background:#38bdf8"></i>50-90%</span><span><i style="background:var(--pri)"></i>达标</span><span><i style="background:var(--warn)"></i>超标</span><span><i style="background:var(--info)"></i>● 有体测</span></div>`;
+  html+=`<div class="hint" style="margin-top:8px">本月达标 ${ok} 天 / 有记录 ${total} 天 · 点击日期跳转补录</div>`;
+  box.innerHTML=html;
+}
+
+/* ---------- 我的页 ---------- */
+function dayGap(s){return Math.floor((+new Date(todayStr())-+new Date(s))/86400000)}
+function renderMe(){
+  const t=calcT(),pf=db.profile,micro=microDef(t.kcal);
+  if(!pf.sex){$('#pg-me').innerHTML=`<div class="card center" style="padding:36px 20px"><div style="font-size:44px">👋</div><p style="margin:10px 0;color:var(--sub)">请先填写个人档案<br>App 会自动计算你的每日营养目标</p><button class="btn" data-act="editProfile">去填写档案</button></div>`;return}
+  let html=`<div class="sec-title">👤 个人档案<span class="right" data-act="editProfile">编辑</span></div><div class="card">`;
+  if(!pf.sex)html+=`<div class="empty">尚未填写档案</div>`;
+  else html+=`<div class="hint" style="font-size:14px;color:var(--text)">${pf.sex==='m'?'男':'女'} · ${pf.age} 岁 · ${pf.height} cm · ${pf.weight} kg · PAL ${n2(pf.pal)}</div>
+  <div class="hint">BMR ${n1(t.bmr)} kcal · PAL ${n2(pf.pal)} → TDEE ${n1(t.tdeeRaw)} kcal${t.exp!==1?` × 经验系数 ${n2(t.exp)} = <b>${n1(t.tdee)} kcal</b>`:''} · ${pf.goal==='gain'?'增肌 +'+n1(pf.surplusPct)+'%':pf.goal==='cut'?'减脂 −'+n1(pf.deficitPct)+'%':'维持'} · 训练日 +${n1(pf.trainOffset)} kcal · ${pf.formula==='fao'?'FAO公式':'Mifflin公式'}</div>
+  ${t.exp!==1?`<div class="hint">ℹ️ 经验修正系数 ${n2(t.exp)} 为教练经验值（非权威标准），等效于把 PAL 降到 ${n2(pf.pal*t.exp)}；不需要时可设为 1.0</div>`:''}`;
+  html+=`</div>`;
+  const ovNum=['kcal','protein','fat','carb','fiber','water'].filter(k=>t.ov[k]).length;
+  html+=`<div class="sec-title">🎯 目标设置<span class="right" data-act="editGoal">编辑</span></div><div class="card">
+  <div class="hint" style="font-size:14px;color:var(--text)">热量 ${n1(t.kcal)}${t.ov.kcal?'<b style="color:var(--warn)"> (手动锁定)</b>':''} kcal · 蛋白 ${n1(t.protein)}g${t.ov.protein?'<b style="color:var(--warn)">(手动)</b>':''} · 脂肪 ${n1(t.fat)}g${t.ov.fat?'<b style="color:var(--warn)">(手动)</b>':''} · 碳水 ${n1(t.carb)}g${t.ov.carb?'<b style="color:var(--warn)">(手动)</b>':''} · 纤维 ${n1(t.fiber)}g · 水 ${n1(t.water)}ml</div>
+  <div class="hint">蛋白 ${n1(pf.proteinPerKg)} g/kg · 脂肪供能 ${n1(pf.fatPct)}% · 运动计入${pf.countExercise?'✓':'✗'} · 新食物默认${pf.kcalDefault==='auto'?'自动算':'手填'}热量</div>
+  ${ovNum?`<div class="warn-box">⚠️ 有 ${ovNum} 项被手动锁定，改档案或盈余比例不会影响它们（例如热量当前显示 ${n1(t.kcal)} kcal，而按公式算应为 ${n1(t.auto.kcal)} kcal）。点下方按钮可恢复自动。</div>`:''}
+  <button class="btn ghost small" data-act="editTargets" style="margin-top:8px">覆盖单个营养目标${ovNum?`（已覆盖 ${ovNum} 项）`:''}</button></div>`;
+  html+=`<div class="sec-title">🧪 微量元素目标<span class="right" data-act="editMicro">管理</span></div><div class="card"><div class="hint">${db.microList.map(m=>{const def=MICRO_DEF[m.key];if(def&&def.info)return `${m.name}（仅记录）`;return `${m.name} ${micro[m.key]!=null?n1(micro[m.key]):'—'}${m.unit}${(def&&def.min)?'(越低越好)':(m.limit?'(≤)':'')}`}).join(' · ')}</div></div>`;
+  html+=`<div class="sec-title">📏 围度项目<span class="right" data-act="editMetrics">管理</span></div><div class="card"><div class="hint">${db.metrics.map(m=>m.name).join(' · ')}</div></div>`;
+  html+=`<div class="sec-title">📖 食物库（${db.foods.length} 条）<span class="right" data-act="openLib">管理</span></div><div class="card"><button class="btn ghost" data-act="csvOpen">📄 CSV 导入 / 导出</button></div>`;
+  html+=`<div class="sec-title">🍱 餐组合（${db.combos.length} 个）<span class="right" data-act="openComboManage">管理</span></div>`;
+  html+=`<div class="sec-title">🏅 徽章<span class="right" data-act="openBadges">查看</span></div><div class="card"><div class="hint">已获得 ${badges().filter(b=>b[2]).length} / ${badges().length} 枚</div></div>`;
+  html+=`<div class="sec-title">🎨 外观</div><div class="card"><div class="chips"><button class="chip ${pf.theme==='auto'?'on':''}" data-act="setTheme" data-s="auto">跟随系统</button><button class="chip ${pf.theme==='light'?'on':''}" data-act="setTheme" data-s="light">浅色</button><button class="chip ${pf.theme==='dark'?'on':''}" data-act="setTheme" data-s="dark">深色</button></div></div>`;
+  html+=`<div class="sec-title">💾 数据备份</div><div class="card">
+  <div class="row2"><button class="btn ghost" data-act="exportJson">⬇️ 导出 JSON</button><button class="btn ghost" data-act="importJson">⬆️ 导入 JSON</button></div>
+  ${db.settings.lastExport?`<div class="hint">上次导出：${db.settings.lastExport}${dayGap(db.settings.lastExport)>7?' · ⚠️ 已超 7 天，建议尽快备份':''}</div>`:`<div class="hint">还没有导出过备份。清缓存会导致数据丢失！</div>`}
+  <button class="btn danger small" data-act="clearAll" style="margin-top:8px">清空全部数据</button></div>`;
+  html+=`<div class="sec-title">ℹ️ 关于<span class="right" data-act="openAbout">查看</span></div><div class="card"><div class="hint">BMR: Mifflin-St Jeor / FAO·WHO·UNU · 供能比与微量: 中国DRIs 2023 · 饮水: 膳食指南2022 · 数据仅存本机，请定期导出备份</div></div>`;
+  $('#pg-me').innerHTML=html;
+}
+
+/* ---------- 设置弹层 ---------- */
+function openProfile(){
+  const pf=db.profile;
+  openSheet('个人档案',`<label>性别</label><select id="pfSex"><option value="">请选择</option><option value="m" ${pf.sex==='m'?'selected':''}>男</option><option value="f" ${pf.sex==='f'?'selected':''}>女</option></select>
+  <div class="row"><div><label>年龄</label><input id="pfAge" type="number" inputmode="decimal" value="${pf.age||''}" placeholder="岁"></div><div><label>身高 cm</label><input id="pfHeight" type="number" inputmode="decimal" value="${pf.height||''}" placeholder="cm"></div></div>
+  <div class="row"><div><label>体重 kg</label><input id="pfWeight" type="number" inputmode="decimal" value="${pf.weight||''}" placeholder="kg"></div><div><label>活动系数 PAL</label><input id="pfPal" type="number" inputmode="decimal" step="0.05" value="${n2(pf.pal)}"></div></div>
+  <div class="hint">PAL 参考（FAO/WHO）：久坐/轻度 1.4–1.69 · 中度活跃 1.7–1.99 · 高度活跃 2.0–2.4</div>
+  <label>BMR 公式</label><select id="pfFormula"><option value="mifflin" ${pf.formula==='mifflin'?'selected':''}>Mifflin-St Jeor（默认）</option><option value="fao" ${pf.formula==='fao'?'selected':''}>FAO/WHO/UNU（仅体重）</option></select>
+  <button class="btn" style="margin-top:12px" data-act="saveProfile">保存档案</button>`);
+}
+function openGoal(){
+  const pf=db.profile;
+  openSheet('目标设置',`<label>目标模式</label><select id="gGoal" data-chg="gGoal">${['gain','maintain','cut'].map(x=>`<option value="${x}" ${pf.goal===x?'selected':''}>${x==='gain'?'增肌（热量盈余）':x==='maintain'?'维持体重':'减脂（热量缺口）'}</option>`).join('')}</select>
+  <div id="gGain" style="display:${pf.goal==='gain'?'block':'none'}"><label>盈余比例 %</label><input id="gSurplus" type="number" inputmode="decimal" value="${n1(pf.surplusPct)}"><div class="hint">常见 +5% ~ +15%，保守起步</div></div>
+  <div id="gCut" style="display:${pf.goal==='cut'?'block':'none'}"><label>减脂缺口 %</label><input id="gDeficit" type="number" inputmode="decimal" value="${n1(pf.deficitPct)}"><div class="hint">常见 −10% ~ −20%；减脂期蛋白不降，保持肌肉</div></div>
+  <div class="row"><div><label>训练日额外 kcal</label><input id="gTrain" type="number" inputmode="decimal" value="${n1(pf.trainOffset)}"></div><div><label>蛋白质 g/kg</label><input id="gPro" type="number" inputmode="decimal" step="0.1" value="${n1(pf.proteinPerKg)}"></div></div>
+  <div class="hint">增肌参考 1.6–2.2 g/kg（可与私教确认后调整）</div>
+  <div class="row"><div><label>脂肪供能比 %</label><input id="gFat" type="number" inputmode="decimal" value="${n1(pf.fatPct)}"></div><div><label>新食物默认热量</label><select id="gKcal"><option value="manual" ${pf.kcalDefault==='manual'?'selected':''}>手填</option><option value="auto" ${pf.kcalDefault==='auto'?'selected':''}>按宏量自动算</option></select></div></div>
+  <div class="hint">脂肪供能比参考 20–30%（AMDR）</div>
+  <label>经验修正系数</label><input id="gExp" type="number" inputmode="decimal" step="0.05" value="${n2(pf.expFactor==null?1:pf.expFactor)}">
+  <div class="hint">按教练经验对 TDEE 估算值做折减（现代人生活方式下估算偏高，常用 <b>0.8</b>）；<b>1.0 = 不做修正</b>。这是经验值、<b>非任何权威标准</b>。<br>当前 PAL ${n2(pf.pal)} × ${n2(pf.expFactor==null?1:pf.expFactor)} = 等效 PAL <b>${n2(pf.pal*(pf.expFactor==null?1:pf.expFactor))}</b>（即：乘系数与降低 PAL 是同一件事）</div>
+  <div style="margin-top:10px"><input id="gCount" type="checkbox" ${pf.countExercise?'checked':''}> <span style="font-size:14px">运动消耗计入「还可以吃」</span></div>
+  <button class="btn" style="margin-top:12px" data-act="saveGoal">保存</button>`);
+}
+function openTargets(){
+  const t=calcT(),ov=t.ov,au=t.auto;
+  const row=(k,name,unit)=>`<div class="item"><div class="grow"><div class="iname">${name}${ov[k]?' <span style="color:var(--warn);font-size:12px">已手动覆盖</span>':''}</div>
+    <div class="isub">当前：${n1(t[k])} ${unit}　·　按公式算：${n1(au[k])} ${unit}</div></div>
+    ${ov[k]?`<button class="del" data-act="rstTarget" data-k="${k}">恢复自动</button>`:''}</div>
+    <input type="number" inputmode="decimal" value="${ov[k]?n1(db.targets[k]):''}" placeholder="留空 = 用按公式算的值" data-tk="${k}">`;
+  openSheet('覆盖营养目标',row('kcal','热量','kcal')+row('protein','蛋白质','g')+row('fat','脂肪','g')+row('carb','碳水','g')+row('fiber','膳食纤维','g')+row('water','饮水','ml')+
+  `<div class="hint">留空 = 用按公式算的值；填了数字 = 锁定为手动值，<b>之后修改档案、盈余比例都不会再影响这一项</b>，直到点「恢复自动」</div>
+  ${Object.keys(ov).some(k=>ov[k])?`<button class="btn ghost small" style="margin-top:8px" data-act="rstAllTargets">全部恢复自动</button>`:''}
+  <button class="btn" style="margin-top:12px" data-act="saveTargets">保存</button>`);
+}
+function openMicro(){
+  const auto=microDef(calcT().kcal);
+  let html='';
+  db.microList.forEach((m,i)=>{
+    html+=`<div class="item"><div class="grow"><div class="iname">${esc(m.name)}${(MICRO_DEF[m.key]&&MICRO_DEF[m.key].info)?' <span style="color:var(--sub);font-size:12px">仅记录</span>':((MICRO_DEF[m.key]&&MICRO_DEF[m.key].min)?' <span style="color:var(--danger);font-size:12px">越低越好</span>':(m.limit?' <span style="color:var(--warn);font-size:12px">上限型</span>':''))} <span style="color:var(--sub);font-size:12px">${m.unit}/天</span></div></div><input type="number" inputmode="decimal" value="${db.targets.micro[m.key]!=null?n1(db.targets.micro[m.key]):''}" placeholder="${(MICRO_DEF[m.key]&&MICRO_DEF[m.key].info)?'仅记录':'自动 '+n1(auto[m.key])}" data-mk="${m.key}" style="flex:0 0 110px"><button class="del" data-act="delMicro" data-i="${i}">✕</button></div>`;
+  });
+  html+=`<button class="btn" style="margin-top:12px" data-act="saveMicro">保存目标</button>`;
+  html+=`<div class="hint" style="margin-top:8px">自动值来源：中国DRIs 2023 成人推荐量（按性别自动填）；饱和脂肪(热量×10%÷9)、反式脂肪(热量×1%÷9)按当日热量动态计算；胆固醇上限 300mg 参考中国血脂管理指南(2023)；添加糖/反式脂肪为「越低越好」型；留空 = 自动</div>`;
+  const extra=EXTRA_MICROS.filter(e=>!db.microList.some(m=>m.key===e.key));
+  html+=`<div class="sec-title">添加更多营养项（自带自动目标）</div><div class="chips">${extra.map(e=>`<button class="chip" data-act="addMicro" data-k="${e.key}">＋${e.name}${e.info?'·仅记录':(e.min?'·越低越好':(e.limit?'·上限':''))}</button>`).join('')||'<span class="hint">已全部添加</span>'}</div>`;
+  openSheet('微量元素目标',html);
+}
+function openMetrics(){
+  let html=db.metrics.map((m,i)=>`<div class="item"><div class="grow"><input value="${esc(m.name)}" data-mn="${i}" placeholder="名称"></div><button class="del" data-act="delMetric" data-i="${i}">✕</button></div>`).join('');
+  html+=`<div class="row" style="margin-top:8px"><input id="newMetric" placeholder="新围度名称，如：小腿围"></div><button class="btn" style="margin-top:10px" data-act="addMetric">＋ 添加围度</button><button class="btn ghost" style="margin-top:8px" data-act="saveMetrics">保存名称修改</button>`;
+  openSheet('围度项目',html);
+}
+function libListHTML(q){
+  q=(q||'').trim();
+  const list=db.foods.filter(f=>!q||f.name.includes(q)).sort((a,b)=>a.name.localeCompare(b.name,'zh'));
+  return list.map(f=>`<div class="item"><div class="grow" data-act="libEdit" data-fid="${f.id}"><div class="iname">${f.fav?'⭐ ':''}${esc(f.name)}${f.cat==='sup'?' 💊':''}</div><div class="isub">${baseLabel(f)}：${n1(f.kcal)} kcal · 蛋白 ${n1(f.p)} · 脂肪 ${n1(f.f)} · 碳水 ${n1(f.c)}${(f.units||[]).filter(u=>u.name!=='g').length?' · 单位 '+f.units.filter(u=>u.name!=='g').map(u=>'1'+u.name+'='+n2(u.g)+'g').join('/'):''}${stockLabel(f)}${f.mealMax!=null?' · 单餐上限'+capText(f):''}${f.dayMax!=null?' · 单日上限'+dayText(f):''}${f.splitMax?' · 最多分'+f.splitMax+'餐':''}</div></div><button class="del" data-act="libFav" data-fid="${f.id}">${f.fav?'取消⭐':'⭐'}</button></div>`).join('')||`<div class="empty">没有匹配的食物，点上方新建或导入</div>`;
+}
+function openLib(){
+  const html=`<button class="btn" style="margin-bottom:10px" data-act="newFood">＋ 新建食物</button>
+  <input id="libQ" placeholder="🔍 搜索食物名称" data-inp="libQ" style="margin-bottom:10px">
+  <div class="hint" style="margin-bottom:8px">共 ${db.foods.length} 条 · 点名称编辑</div>
+  <div id="libList">${libListHTML('')}</div>`;
+  openSheet('食物库管理',html);
+}
+function openBadges(){
+  openSheet('我的徽章',`<div class="badges">${badges().map(b=>`<div class="badge ${b[2]?'got':''}"><span class="ico">${b[0]}</span>${b[1]}</div>`).join('')}</div><div class="hint" style="margin-top:10px">徽章由你的记录自动计算，连续打卡从今天（或昨天）往前数有饮食记录的天数</div>`);
+}
+function openAbout(){
+  openSheet('关于 · 公式来源',`<div style="font-size:13px;line-height:1.9">
+  <b>BMR</b>：Mifflin-St Jeor 1990（pubmed.ncbi.nlm.nih.gov/2305711）· 备选 FAO/WHO/UNU 2004（fao.org/4/y5686e）<br>
+  <b>活动系数</b>：FAO/WHO/UNU 2004 Table 5.3（PAL 1.4–2.4）<br>
+  <b>增肌盈余</b>：Slater et al. 2019, Front Nutr（doi:10.3389/fnut.2019.00131）<br>
+  <b>蛋白质</b>：Morton et al. 2018 BJSM（1.6–2.2 g/kg）· ISSN 2017（1.4–2.0）<br>
+  <b>供能比 AMDR</b>：中国居民膳食营养素参考摄入量(2023)：蛋白 10–20% · 脂肪 20–30% · 碳水 50–65%<br>
+  <b>微量元素</b>：中国 DRIs 2023 成人 RNI（可对照 NIH ods.od.nih.gov）<br>
+  <b>饮水</b>：中国居民膳食指南(2022)：女 1500 / 男 1700 ml · 运动日按 ACSM 2007 加 500 ml<br>
+  <b>能量换算</b>：FAO 2003 Atwater 系数：蛋白 4 · 脂肪 9 · 碳水 4 kcal/g<br>
+  <b>运动消耗</b>：2024 Compendium of Physical Activities（MET×体重kg×小时）<br><br>
+  ⚠️ 免责声明：本 App 仅供个人记录参考，所有数值均为估算，不能替代医生、营养师或教练的专业建议。数据仅保存在本机浏览器中，清缓存会丢失，请定期导出备份。</div>`);
+}
+
+/* ---------- CSV / 备份 ---------- */
+function csvBuild(){
+  return '名称\t热量kcal\t蛋白g\t脂肪g\t碳水g\t纤维g\t钠mg\t添加糖g\t饱和脂肪g\n'+db.foods.map(f=>[f.name,f.kcal,f.p,f.f,f.c,f.fib,f.micro&&f.micro.na!=null?f.micro.na:'',f.micro&&f.micro.su!=null?f.micro.su:'',f.micro&&f.micro.sf!=null?f.micro.sf:''].join('\t')).join('\n');
+}
+function csvOpen(){
+  openSheet('文本导入 / 导出（TXT）',`<label>导出</label><button class="btn ghost" data-act="csvExport">⬇️ 下载 TXT 文件（可在电脑编辑后导回）</button>
+  <label>导入（每行一个食物，逗号或制表符分隔，数值为每 100g）</label>
+  <textarea id="csvText" rows="7" placeholder="名称,热量,蛋白,脂肪,碳水,纤维,钠,添加糖,饱和脂肪&#10;鸡腿肉,181,16,13,0,0,64,0,3.2&#10;鸡蛋,144,13.3,8.8,2.8,0,131,0,2.5"></textarea>
+  <div class="hint">第一列名称必填；第 2–9 列可留空；首行表头自动跳过；重名默认跳过。直接从 Excel 复制粘贴也行</div>
+  <button class="btn" style="margin-top:10px" data-act="csvImport">📥 导入</button><div id="csvResult" class="hint" style="margin-top:8px"></div>`);
+}
+function csvImport(){
+  const lines=val('csvText').split(/\r?\n/).filter(l=>l.trim());
+  let ok=0,skip=0;const errors=[];
+  for(let i=0;i<lines.length;i++){
+    const p=lines[i].split(/[,\t]/).map(s=>s.trim());
+    if(!p[0]||p[0]==='名称')continue;
+    if(isNaN(+p[1])){errors.push('第'+(i+1)+'行热量不是数字');continue}
+    if(db.foods.some(x=>x.name===p[0])){skip++;continue}
+    db.foods.push({id:uid(),name:p[0],kcal:+p[1]||0,p:+p[2]||0,f:+p[3]||0,c:+p[4]||0,fib:+p[5]||0,micro:{na:p[6]!==''?+p[6]:null,su:p[7]!==''?+p[7]:null,sf:p[8]!==''?+p[8]:null},units:[{name:'g',g:1}],cat:'',kcalAuto:false,fav:0,used:0,last:''});
+    ok++;
+  }
+  save();
+  $('#csvResult').textContent=`✅ 新增 ${ok} 条，重名跳过 ${skip} 条${errors.length?'；'+errors.slice(0,5).join('；'):''}`;
+  $('#csvText').value='';
+}
+function download(name,text,type){
+  const blob=new Blob([text],{type:type||'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+function exportJson(){
+  db.settings.lastExport=todayStr();save();
+  download('减脂增肌备份_'+todayStr()+'.json',JSON.stringify(db),'application/json');
+  toast('✅ 已导出备份文件');
+}
+function importJson(){fileMode='import';$('#fileIn').accept='.json,application/json';$('#fileIn').click()}
+
+/* ---------- 主题 ---------- */
+function applyTheme(){
+  const t=db.profile.theme||'auto';
+  const dark=t==='dark'||(t==='auto'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.setAttribute('data-theme',dark?'dark':'light');
+}
+/* ---------- 图表触摸取点 ---------- */
+let trendSel=null,wbHide=[false,false];
+function bindTrendTouch(){
+  const cv=$('#cvTrend');if(!cv)return;
+  const onMove=e=>{
+    if(trendTab!=='chart')return;
+    const r=cv.getBoundingClientRect();
+    const px=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
+    const series=trendSeries();
+    let xmin=Infinity,xmax=-Infinity;
+    for(const se of series)if(!se.hide)for(const p of se.data){xmin=Math.min(xmin,p.x);xmax=Math.max(xmax,p.x)}
+    if(!isFinite(xmin))return;
+    const W=cv.clientWidth-80,xv=v=>40+(v-xmin)/(xmax-xmin||1)*W;
+    let best=null,bd=70;
+    series.forEach((se,i)=>{if(se.hide)return;se.data.forEach((p,j)=>{const dx=Math.abs(xv(p.x)-px);if(dx<bd){bd=dx;best={i,j}}})});
+    trendSel=best;drawTrend();
+  };
+  const onEnd=()=>{if(trendSel){trendSel=null;drawTrend()}};
+  cv.addEventListener('pointerdown',onMove);
+  cv.addEventListener('pointermove',e=>{if(e.pointerType==='touch')onMove(e)});
+  cv.addEventListener('pointerup',onEnd);
+  cv.addEventListener('pointerleave',onEnd);
+  // 旧版 iOS 无 PointerEvent，用触摸事件兜底
+  cv.addEventListener('touchstart',onMove,{passive:true});
+  cv.addEventListener('touchmove',onMove,{passive:true});
+  cv.addEventListener('touchend',onEnd);
+}
+
+/* ---------- 文件导入 / 照片压缩 ---------- */
+function onFile(e){
+  const files=[...e.target.files];e.target.value='';
+  if(!files.length)return;
+  const file=files[0];
+  if(fileMode==='import'){
+    const r=new FileReader();
+    r.onload=()=>{
+      try{
+        const data=JSON.parse(r.result);
+        if(!data||data.v!==1||!data.profile||!data.logs)return toast('⚠️ 文件格式不正确');
+        ask(`用备份覆盖当前数据？（当前 ${Object.keys(db.logs).length} 天记录 / ${db.foods.length} 个食物）`,()=>{db=data;save();load();renderDatebar();go('me');toast('✅ 导入成功')});
+      }catch(err){toast('⚠️ 文件不是有效的 JSON')}
+    };
+    r.readAsText(file);
+  }else if(fileMode==='photo'){
+    const out=[];
+    let done=0;
+    const finish=()=>{
+      if(++done<files.length)return;
+      if(!out.length)return;
+      if(photoTarget&&photoTarget.meal){setMealPhoto(photoTarget.meal,out);return}
+      photoData=out[0];
+      const prev=$('#bPhotoPrev');if(prev){prev.src=photoData;prev.style.display=''}
+      const del=$('#bPhotoDelBtn');if(del)del.style.display='';
+      toast('📷 照片已压缩（约'+Math.round(photoData.length/1024)+'KB）');
+    };
+    files.forEach(file=>{
+      const r=new FileReader();
+      r.onload=()=>{
+        const img=new Image();
+        img.onload=()=>{
+          try{
+            const sc=Math.min(1,480/Math.max(img.width,img.height));
+            const cv=document.createElement('canvas');
+            cv.width=Math.round(img.width*sc);cv.height=Math.round(img.height*sc);
+            cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+            out.push(cv.toDataURL('image/jpeg',0.6));
+          }catch(err){toast('⚠️ 有图片无法压缩，已跳过')}
+          finish();
+        };
+        img.onerror=()=>{toast('⚠️ 有图片无法读取，已跳过');finish()};
+        img.src=r.result;
+      };
+      r.readAsDataURL(file);
+    });
+  }
+}
+function openMonthPick(){
+  const y=+cur.slice(0,4),m=+cur.slice(5,7),d=+cur.slice(8,10),now=new Date().getFullYear();
+  openSheet('跳转日期',`<div class="row"><select id="jy">${[now-2,now-1,now,now+1,now+2].map(x=>`<option value="${x}" ${x===y?'selected':''}>${x}年</option>`).join('')}</select><select id="jm">${Array.from({length:12},(_,i)=>`<option value="${i+1}" ${i+1===m?'selected':''}>${i+1}月</option>`).join('')}</select></div>
+  <label>日期</label><input id="jd" type="number" inputmode="decimal" min="1" max="31" value="${d}">
+  <button class="btn" style="margin-top:12px" data-act="jumpDate">跳转</button>`);
+}
+
+/* ---------- 事件处理 ---------- */
+const ACT={
+  dbPrev:()=>setCur(addDays(cur,-1)),
+  dbNext:()=>setCur(addDays(cur,1)),
+  dbToday:()=>setCur(todayStr()),
+  dbLabel:openMonthPick,
+  jumpDate:()=>{
+    const y=+$('#jy').value,m=+$('#jm').value,d=+$('#jd').value;
+    if(!y||!m||!d)return;
+    if(d<1||d>new Date(y,m,0).getDate())return toast('日期无效');
+    setCur(`${y}-${pad(m)}-${pad(d)}`);closeSheet();
+  },
+  closeSheet:()=>{const b=sheetBack;closeSheet();if(b==='plan')renderPlanSheet(planQuery)},
+  cNo:()=>{$('#confirm').classList.remove('on');confirmFn=null},
+  cYes:()=>{$('#confirm').classList.remove('on');const f=confirmFn;confirmFn=null;f&&f()},
+  editProfile:openProfile,
+  saveProfile:()=>{
+    const pf=db.profile,sex=val('pfSex'),age=num('pfAge'),h=num('pfHeight'),w=num('pfWeight'),pal=num('pfPal');
+    if(!sex)return toast('请选择性别');
+    if(age<10||age>100)return toast('年龄需在 10–100');
+    if(h<80||h>250)return toast('身高需在 80–250 cm');
+    if(w<20||w>300)return toast('体重需在 20–300 kg');
+    if(pal<1||pal>3)return toast('PAL 需在 1–3');
+    Object.assign(pf,{sex,age,height:h,weight:w,pal,formula:val('pfFormula')});
+    save();closeSheet();
+    const t=calcT();
+    toast(`BMR ${n1(t.bmr)} · TDEE ${n1(t.tdee)} → 目标 ${n1(t.kcal)} kcal · 蛋白 ${n1(t.protein)}g`);
+    refresh();
+  },
+  editGoal:openGoal,
+  saveGoal:()=>{
+    const pf=db.profile;
+    pf.goal=val('gGoal');
+    pf.surplusPct=num('gSurplus')||10;
+    pf.deficitPct=num('gDeficit')||15;
+    pf.trainOffset=num('gTrain')||0;
+    const ex=num('gExp');if(ex>=0.5&&ex<=1.2)pf.expFactor=ex;
+    const p=num('gPro');if(p>=1&&p<=3)pf.proteinPerKg=p;
+    const f=num('gFat');if(f>=15&&f<=40)pf.fatPct=f;
+    pf.kcalDefault=val('gKcal');
+    pf.countExercise=$('#gCount').checked;
+    save();closeSheet();refresh();
+    const t=calcT();toast(`目标：${n1(t.kcal)} kcal · 蛋白 ${n1(t.protein)}g`);
+  },
+  editTargets:openTargets,
+  rstTarget:d=>{db.targets[d.k]=null;save();openTargets();refresh()},
+  rstAllTargets:()=>ask('把全部营养目标恢复为按公式计算？（微量营养素的自定义目标不受影响）',()=>{
+    db.targets={kcal:null,protein:null,fat:null,carb:null,fiber:null,water:null,micro:db.targets.micro||{}};
+    save();closeSheet();refresh();toast('✅ 已全部恢复自动');
+  }),
+  saveTargets:()=>{
+    document.querySelectorAll('[data-tk]').forEach(el=>{const v=el.value.trim();db.targets[el.dataset.tk]=v===''?null:+v});
+    save();closeSheet();toast('✅ 已保存');refresh();
+  },
+  editMicro:openMicro,
+  saveMicro:()=>{
+    document.querySelectorAll('[data-mk]').forEach(el=>{const v=el.value.trim();db.targets.micro[el.dataset.mk]=v===''?null:+v});
+    save();closeSheet();toast('✅ 已保存');refresh();
+  },
+  addMicro:d=>{
+    const def=MICRO_DEF[d.k];if(!def)return;
+    db.microList.push({key:d.k,name:def.n,unit:def.u,limit:(def.lim!=null||def.dyn)?1:0});
+    save();openMicro();
+  },
+  delMicro:d=>{db.microList.splice(+d.i,1);save();openMicro()},
+  editMetrics:openMetrics,
+  addMetric:()=>{
+    const name=val('newMetric').trim();
+    if(!name)return toast('请填写名称');
+    db.metrics.push({key:uid(),name});save();openMetrics();
+  },
+  delMetric:d=>{db.metrics.splice(+d.i,1);save();openMetrics()},
+  saveMetrics:()=>{
+    document.querySelectorAll('[data-mn]').forEach(el=>{const v=el.value.trim();if(v)db.metrics[+el.dataset.mn].name=v});
+    save();closeSheet();toast('✅ 已保存');
+  },
+  openLib:openLib,
+  newFood:()=>openFoodEdit(''),
+  libEdit:d=>openFoodEdit(d.fid),
+  libFav:d=>{const f=foodById(d.fid);if(f){f.fav=f.fav?0:1;save();openLib()}},
+  fMode:d=>fMode(d.m==='auto'),
+  parseLabel:parseLabel,
+  toggleMicroFields:()=>{
+    const box=$('#fMoreMicro'),btn=$('#moreMicroBtn');
+    if(!box||!btn)return;
+    const open=box.style.display!=='none';
+    box.style.display=open?'none':'block';
+    btn.textContent=(open?'🔽':'🔼')+' 更多营养素（维E/K、B族、胆碱、磷铜锰铬钼氟等）';
+  },
+  saveFood:d=>{
+    const name=val('fName').trim();
+    if(!name)return toast('请填写食物名称');
+    if(!d.fid&&db.foods.some(x=>x.name===name))return toast('⚠️ 食物库已有「'+name+'」，请搜索并编辑它');
+    const p=num('fP'),f=num('fF'),c=num('fC');
+    let kcal=num('fKcal');
+    if(sheetSaveAuto)kcal=+(p*4+f*9+c*4).toFixed(1);
+    if(!kcal&&!(p||f||c)&&!Object.keys(readMicro()).length)return toast('请填写热量、三大营养素或至少一项营养含量（维生素片等零热量项可只填微量）');
+    const units=[];
+  document.querySelectorAll('#fUnits .unitrow').forEach(r=>{
+    const un=r.querySelector('.un').value.trim(),ug=parseFloat(r.querySelector('.ug').value);
+    if(un&&ug>0)units.push({name:un,g:ug});
+  });
+  const data={name,kcal,kcalAuto:sheetSaveAuto,p,f,c,fib:num('fFib'),micro:readMicro(),cat:val('fCat'),fav:$('#fFav').checked?1:0,units:units.length?units:[{name:'g',g:1}],baseQty:num('fBaseQty')||1,baseName:val('fBaseUnit')||'克',baseG:fBaseG(),
+    stock:$('#fStockQty').value.trim()===''?null:+((num('fStockQty')||0)*formUnitG(val('fStockUnit'))).toFixed(1),
+    stockUnit:val('fStockUnit')||'克',
+    mealMax:$('#fMealMaxQty').value.trim()===''?null:+((num('fMealMaxQty')||0)*formUnitG(val('fMealUnit'))).toFixed(2),
+    mealTol:$('#fMealTolQty').value.trim()===''?null:+((num('fMealTolQty')||0)*formUnitG(val('fMealUnit'))).toFixed(2),
+    mealUnit:val('fMealUnit')||'克',
+    dayMax:$('#fDayMaxQty').value.trim()===''?null:+((num('fDayMaxQty')||0)*formUnitG(val('fDayUnit'))).toFixed(2),
+    dayUnit:val('fDayUnit')||'克',
+    splitMax:val('fSplit')===''?null:+val('fSplit')};
+    if(d.fid)Object.assign(foodById(d.fid),data);
+    else db.foods.push(Object.assign({id:uid(),units:[{name:'g',g:1}],used:0,last:''},data));
+    save();closeSheet();toast(d.fid?'✅ 已保存修改':'✅ 已添加 '+name);refresh();
+  },
+  delFood:d=>{
+    const f=foodById(d.fid);
+    ask(`删除食物「${f?f.name:''}」？历史记录中的营养数值不受影响`,()=>{db.foods=db.foods.filter(x=>x.id!==d.fid);save();closeSheet();refresh()});
+  },
+  fAddUnit:()=>{
+    const name=val('fUName').trim(),g=num('fUG');
+    if(!name||g<=0)return toast('请填写单位名和克数');
+    $('#fUnits').insertAdjacentHTML('beforeend',unitRowHTML({name,g}));
+    $('#fUName').value='';$('#fUG').value='';
+    fillAllUnitSel();fBaseHint();fStockHint();fMealHint();fDayHint();
+  },
+  fBaseHint:()=>fBaseHint(),
+  fStockHint:()=>fStockHint(),
+  fMealHint:()=>fMealHint(),
+  fDelUnitRow:t=>{const r=t.closest('.unitrow');if(r){r.remove();fillAllUnitSel();fBaseHint();fStockHint();fMealHint();fDayHint()}},
+  pick:d=>openPicker(d.meal),
+  pickCat:d=>{
+    pickCat=d.c;
+    document.querySelectorAll('[data-act=pickCat]').forEach(b=>b.classList.toggle('on',b.dataset.c===pickCat));
+    renderPickList(val('pickQ'));
+  },
+  pickBoil:()=>{pickBoil=!pickBoil;renderPickSel(num('pickQty')||1,$('#pickUnit').value)},
+  pickSort:d=>{
+    pickSort=d.s;
+    document.querySelectorAll('[data-act=pickSort]').forEach(b=>b.classList.toggle('on',b.dataset.s===pickSort));
+    renderPickList(val('pickQ'));
+  },
+  pickSel:d=>{selFid=d.fid;renderPickSel()},
+  pickQuick:d=>quickAdd(d.fid),
+  editSelFood:()=>{if(selFid)openFoodEdit(selFid)},
+  pickNewUnit:()=>{
+    const f=foodById(selFid);if(!f)return;
+    pickQtyHold=num('pickQty')||1;
+    pickEditIdx=pickEdit?pickEdit.idx:null;
+    openSheet('为「'+f.name+'」添加单位',`<label>单位名</label><input id="puName" placeholder="如 个 / 碗 / 勺 / 半碗"><label>1 单位 = 多少 g</label><input id="puG" type="number" inputmode="decimal" placeholder="如 50"><button class="btn" style="margin-top:12px" data-act="puSave">保存并返回</button>`);
+  },
+  puSave:()=>{
+    const f=foodById(selFid);if(!f)return;
+    const name=val('puName').trim(),g=num('puG');
+    if(!name||g<=0)return toast('请填写单位名和克数');
+    const ex=f.units.find(x=>x.name===name);
+    if(ex)ex.g=g;else f.units.push({name,g});
+    f.lastUnit=name;save();
+    openPicker(pickMeal,f.id,pickQtyHold,name);
+    if(pickEditIdx!=null)pickEdit={idx:pickEditIdx};
+    renderPickSel(pickQtyHold,name);
+    toast('✅ 已添加单位 1'+name+'='+n1(g)+'g，自动换算已生效');
+  },
+  pickAdd:()=>{
+    const f=foodById(selFid);if(!f)return toast('请先选择食物');
+    const units=f.units&&f.units.length?f.units:[{name:'g',g:1}];
+    const u=units.find(x=>x.name===$('#pickUnit').value)||units[0];
+    const qty=num('pickQty');
+    if(qty<=0)return toast('数量需大于 0');
+    const g=+(qty*u.g).toFixed(1),n=foodNutr(f,g);
+    f.used=(f.used||0)+1;f.last=cur;f.lastUnit=u.name;
+    pushItem({fid:f.id,name:f.name,qty:+qty.toFixed(2),unit:u.name,g,kcal:n.kcal,p:n.p,f:n.f,c:n.c,fib:n.fib,micro:n.micro,boil:pickBoil?1:0});
+  },
+  pickDel:()=>{
+    const log=getLog(cur);
+    if(!log||pickEdit==null)return;
+    log.meals[pickMeal].splice(pickEdit.idx,1);save();closeSheet();refresh();toast('已删除');
+  },
+  editItem:d=>{
+    openPicker(d.meal);
+    const log=getLog(cur);
+    if(!log)return;
+    const it=log.meals[d.meal][+d.idx];if(!it)return;
+    selFid=it.fid;pickEdit={idx:+d.idx};pickBoil=!!it.boil;
+    renderPickSel(it.qty,it.unit);
+  },
+  comboAdd:d=>comboToMeal(d.id),
+  comboTo:d=>{
+    const c=db.combos.find(x=>x.id===d.id);
+    if(!c)return;
+    pickMeal=d.meal;closeSheet();
+    let added=0,skipped=0;
+    const log=ensureLog(cur);
+    for(const it of c.items){
+      const f=foodById(it.fid);
+      if(!f){skipped++;continue}
+      const n=foodNutr(f,it.g);
+      log.meals[pickMeal].push({fid:f.id,name:f.name,qty:it.qty,unit:it.unit,g:it.g,kcal:n.kcal,p:n.p,f:n.f,c:n.c,fib:n.fib,micro:n.micro});
+      deductStock(f.id,it.g);
+      f.used=(f.used||0)+1;f.last=cur;added++;
+    }
+    save();refresh();
+    toast(`✅ 已添加 ${added} 项到${MEAL_NAMES[pickMeal]}${skipped?'（'+skipped+' 项食物已删除，被跳过）':''}`);
+  },
+  openComboManage:openComboManage,
+  openComboEdit:d=>openComboEdit(d.id),
+  cbAddItem:()=>{
+    const f=foodById($('#cbFood').value);if(!f)return;
+    const units=f.units&&f.units.length?f.units:[{name:'g',g:1}];
+    const u=units.find(x=>x.name===$('#cbUnit').value)||units[0];
+    const qty=num('cbQty');
+    if(qty<=0)return toast('数量需大于 0');
+    cbDraft.name=val('cbName').trim();
+    cbDraft.items.push({fid:f.id,name:f.name,qty:+qty.toFixed(2),unit:u.name,g:+(qty*u.g).toFixed(1)});
+    renderComboSheet();
+  },
+  cbDelItem:d=>{cbDraft.name=val('cbName').trim();cbDraft.items.splice(+d.i,1);renderComboSheet()},
+  saveCombo:()=>{
+    const name=val('cbName').trim();
+    if(!name)return toast('请填写组合名称');
+    if(!cbDraft.items.length)return toast('组合里还没有食物');
+    cbDraft.name=name;
+    if(cbDraft.id){const c=db.combos.find(x=>x.id===cbDraft.id);if(c)Object.assign(c,cbDraft)}
+    else{cbDraft.id=uid();db.combos.push(cbDraft)}
+    save();closeSheet();openComboManage();toast('✅ 组合已保存');
+  },
+  delCombo:d=>ask('删除这个组合？（不影响已记录的饮食）',()=>{db.combos=db.combos.filter(x=>x.id!==d.id);save();openComboManage()}),
+  addEx:()=>openEx(null),
+  editEx:d=>openEx(+d.idx),
+  delEx:d=>ask('删除这条运动记录？',()=>{const log=getLog(cur);if(log){log.exercises.splice(+d.idx,1);save();refresh()}}),
+  saveEx:d=>{
+    const log=ensureLog(cur);
+    const name=val('exName').trim()||'运动';
+    const min=num('exMin');
+    if(min<=0)return toast('请填写时长');
+    const met=num('exMet');
+    let kcal=num('exKcal');
+    if(!kcal&&met&&db.profile.weight)kcal=met*db.profile.weight*min/60;
+    const e={name,min,met:met||0,kcal:+kcal.toFixed(1),sets:num('exSets')||null,reps:num('exReps')||null,weight:num('exW')||null};
+    if(d.idx!=='')log.exercises[+d.idx]=e;else log.exercises.push(e);
+    save();closeSheet();refresh();
+  },
+  openPlan:()=>{planSel={};planQuery='';planCache=null;planRem=null;planNotes=[];renderPlanSheet('')},
+  planBack:()=>renderPlanSheet(planQuery),
+  planMode:d=>{planMode=d.m;if(d.meal)planOneMeal=d.meal;renderPlanSheet(planQuery)},
+  planSrc:d=>{planSrc=d.s;renderPlanSheet(planQuery)},
+  planGen:planGen,
+  planCapEdit:d=>openPlanCap(d.fid),
+  planCapSave:d=>{
+    const f=foodById(d.fid);if(!f)return;
+    const box=$('#pcQty'),raw=box?box.value.trim():'',u=val('pcUnit')||'克';
+    const sp=$('#pcSplit')?$('#pcSplit').value:'';
+    f.splitMax=sp===''?null:+sp;
+    if(raw===''){planCapSet(d.fid,null,u);return}
+    const q=num('pcQty');
+    planCapSet(d.fid,q>0?+(q*planUnitG(f,u)).toFixed(2):0,u);
+  },
+  planCapUnlimited:d=>planCapSet(d.fid,0),
+  planCapAuto:d=>planCapSet(d.fid,null),
+  planRDel:d=>{
+    const m=(planCache||[]).find(x=>x.k===d.meal);if(!m)return;
+    m.items.splice(+d.i,1);renderPlanResult();
+  },
+  planRAdd:d=>{
+    const m=(planCache||[]).find(x=>x.k===d.meal);if(!m)return;
+    const f=foodById(val('plAddF_'+d.meal));if(!f)return;
+    let q=num('plAddQ_'+d.meal);if(!(q>0))return toast('请填写数量');
+    let u=val('plAddU_'+d.meal)||'g';
+    let g=+(q*planUnitG(f,u)).toFixed(1);if(!(g>0))return;
+    const D=planDayOf(f);
+    if(D>0){
+      let usedG=0;(planCache||[]).forEach(mm=>mm.items.forEach(x=>{if(x.f.id===f.id)usedG+=x.g}));
+      if(usedG+g>D){
+        const allow=+(D-usedG).toFixed(1);
+        if(!(allow>=0.5))return toast(f.name+' 已达单日上限 '+n1(D)+'g');
+        if(allow<g){toast('⚠️ '+f.name+' 受单日上限 '+n1(D)+'g 限制，实际加入 '+n1(allow)+'g');g=allow;q=allow;u='g'}
+      }
+    }
+    m.items.push({f,g,q,u,n:foodNutr(f,g)});
+    renderPlanResult();
+  },
+  planAdd:d=>{
+    const m=(planCache||[]).find(x=>x.k===d.meal);
+    if(!m||!m.items.length)return;
+    const log=ensureLog(cur);
+    m.items.forEach(x=>{
+      log.meals[m.k].push({fid:x.f.id,name:x.f.name,qty:+x.q.toFixed(2),unit:x.u,g:x.g,kcal:x.n.kcal,p:x.n.p,f:x.n.f,c:x.n.c,fib:x.n.fib,micro:x.n.micro});
+      deductStock(x.f.id,x.g);
+      x.f.used=(x.f.used||0)+1;x.f.last=cur;x.f.lastUnit=x.u;
+    });
+    save();closeSheet();refresh();
+    toast(`✅ 已把${MEAL_NAMES[m.k]}（${m.items.length} 项）加入记录`);
+  },
+  copyYesterday:()=>{
+    const yl=getLog(addDays(cur,-1));
+    const items=yl?yl.meals.breakfast:[];
+    if(!items.length)return toast('昨天没有早餐记录');
+    const log=ensureLog(cur);
+    log.meals.breakfast.push(...items.map(x=>Object.assign({},x)));
+    items.forEach(x=>deductStock(x.fid,x.g));
+    save();refresh();toast('✅ 已复制昨天的早餐');
+  },
+  toggleMicro:()=>{microOpen=!microOpen;refresh()},
+  nutriBreak:d=>openNutriBreak(d.key),
+  mealBreak:d=>openMealBreak(d.meal),
+  trainToggle:d=>{const log=ensureLog(cur);log.trainDay=d.mode==='auto'?null:d.mode==='train';save();refresh()},
+  waterAdd:d=>{
+    if(d.ml==='custom'){
+      openSheet('自定义水量',`<input id="wCustom" type="number" inputmode="decimal" placeholder="ml，填负数 = 撤销"><button class="btn" style="margin-top:10px" data-act="waterCustom">确定</button>`);
+      return;
+    }
+    const log=ensureLog(cur);
+    log.water=Math.max(0,log.water+(+d.ml));
+    save();refresh();
+  },
+  waterCustom:()=>{
+    const v=num('wCustom');
+    if(!v)return;
+    const log=ensureLog(cur);
+    log.water=Math.max(0,log.water+v);
+    save();closeSheet();refresh();
+  },
+  gapAdd:d=>{closeSheet();openPicker('snack',d.fid,+d.qty,d.unit)},
+  subTab:d=>{subTab=d.s;renderData()},
+  calNav:d=>{calM+=+d.d;if(calM<0){calM=11;calY--}if(calM>11){calM=0;calY++}renderCal()},
+  calDay:d=>{setCur(d.d);closeSheet();go('today')},
+  bPhoto:()=>{photoTarget='body';fileMode='photo';$('#fileIn').multiple=false;$('#fileIn').accept='image/*';$('#fileIn').click()},
+  mealPhoto:d=>{photoTarget={meal:d.meal};fileMode='photo';$('#fileIn').multiple=true;$('#fileIn').accept='image/*';$('#fileIn').click()},
+  mealPhotoDel:d=>ask('删除这张餐照？',()=>{
+    const log=getLog(cur);
+    if(!log)return;
+    const a=photosOf(log,d.meal);
+    a.splice(+d.i,1);
+    if(!a.length)delete log.photos[d.meal];
+    save();refresh();toast('已删除餐照');
+  }),
+  bPhotoDel:()=>{
+    photoData='';
+    const p=$('#bPhotoPrev'),b=$('#bPhotoDelBtn');
+    if(p){p.src='';p.style.display='none'}
+    if(b)b.style.display='none';
+    toast('照片已移除，保存后生效');
+  },
+  photoShow:(d,t)=>{
+    const img=t.tagName==='IMG'?t:t.querySelector('img');
+    const src=img&&img.getAttribute('src');
+    if(src&&src.indexOf('data:')===0){$('#photoImg').src=src;$('#photoView').classList.add('on')}
+  },
+  photoClose:()=>$('#photoView').classList.remove('on'),
+  saveBody:()=>{
+    const date=val('bDate');
+    if(!date)return toast('请选择日期');
+    const w=num('bW'),bf=num('bBf'),m={};
+    for(const mt of db.metrics){const v=num('bm_'+mt.key);if(v>0)m[mt.key]=+v.toFixed(1)}
+    if(!(w||bf||Object.keys(m).length||photoData))return toast('请至少填写一项数据');
+    if((w&&(w<20||w>300))||(bf&&(bf<1||bf>70)))return toast('数值超出合理范围，请核对');
+    let rec=db.body.find(x=>x.date===date);
+    if(!rec){rec={date,m:{}};db.body.push(rec)}
+    if(w)rec.weight=w;else delete rec.weight;
+    if(bf)rec.bf=bf;else delete rec.bf;
+    rec.m=m;
+    if(photoData){
+      const n=db.body.filter(x=>x.photo&&x.date!==date).length+1;
+      if(n<=12)rec.photo=photoData;
+      else{delete rec.photo;toast('⚠️ 照片已达上限 12 张，本次未保存照片')}
+    }else delete rec.photo;
+    db.body.sort((a,b)=>a.date.localeCompare(b.date));
+    save();renderBody();toast('✅ 已保存 '+date+' 身体数据');
+  },
+  bodyLoad:d=>{
+    const rec=db.body.find(x=>x.date===d.d);if(!rec)return;
+    $('#bDate').value=rec.date;
+    $('#bW').value=rec.weight!=null?rec.weight:'';
+    $('#bBf').value=rec.bf!=null?rec.bf:'';
+    for(const mt of db.metrics){const el=$('#bm_'+mt.key);if(el)el.value=rec.m&&rec.m[mt.key]!=null?rec.m[mt.key]:''}
+    photoData=rec.photo||'';
+    const p=$('#bPhotoPrev'),b=$('#bPhotoDelBtn');
+    if(p){p.src=photoData;p.style.display=photoData?'':'none'}
+    if(b)b.style.display=photoData?'':'none';
+    window.scrollTo(0,0);
+    toast('已载入，修改后点保存即可覆盖');
+  },
+  bodyDel:d=>ask('删除 '+d.d+' 的身体记录？',()=>{db.body=db.body.filter(x=>x.date!==d.d);save();renderBody()}),
+  trendMode:d=>{trendMode=d.m;renderTrend()},
+  trendRange:d=>{trendRange=d.r;renderTrend()},
+  trendTab:d=>{trendTab=d.s;renderTrend()},
+  togSeries:d=>{wbHide[+d.i]=!wbHide[+d.i];renderTrend()},
+  togGirth:d=>{girthOn[d.k]=girthOn[d.k]===false;renderTrend()},
+  csvOpen:csvOpen,
+  csvExport:()=>{download('食物库_'+todayStr()+'.txt',csvBuild(),'text/plain');toast('✅ 已导出 TXT')},
+  csvImport:csvImport,
+  exportJson:exportJson,
+  importJson:importJson,
+  clearAll:()=>ask('确定清空全部数据？此操作不可恢复！\n（建议先导出备份）',()=>{try{localStorage.removeItem(KEY)}catch(e){}location.reload()}),
+  setTheme:d=>{db.profile.theme=d.s;save();applyTheme();refresh()},
+  openBadges:openBadges,
+  openAbout:openAbout
+};
+const CHG={
+  fBaseHint:()=>fBaseHint(),
+  fStockHint:()=>fStockHint(),
+  fMealHint:()=>fMealHint(),
+  fDayHint:()=>fDayHint(),
+  planChk:t=>{
+    const fid=t.dataset.fid,f=foodById(fid);
+    if(t.checked)planSel[fid]=planDefault(f);
+    else delete planSel[fid];
+    const el=$('#planList');if(el)el.innerHTML=planListHTML(val('planQ'));
+    planSum();
+  },
+  planUnit:t=>{
+    const fid=t.dataset.fid;
+    if(planSel[fid])planSel[fid].u=t.value;
+    const f=foodById(fid),g=planGrams(fid),el=document.getElementById('planCalc_'+fid);
+    if(f&&el&&g>0){const n=foodNutr(f,g);el.innerHTML=`→ <b>${Math.round(n.kcal)}</b> kcal · 蛋白 ${n1(n.p)} · 脂肪 ${n1(n.f)} · 碳水 ${n1(n.c)} · 纤维 ${n1(n.fib)}`}
+    const gEl=document.querySelector(`#planList [data-inp=planQty][data-fid="${fid}"]`);
+    const wrap=gEl?gEl.parentNode.querySelector('.hint'):null;
+    if(wrap)wrap.textContent='= '+n1(g)+' g';
+    planSum();
+  },
+  planRUnit:t=>{
+    const meal=t.dataset.meal,i=+t.dataset.i;
+    const m=(planCache||[]).find(x=>x.k===meal);if(!m)return;
+    const x=m.items[i];if(!x)return;
+    x.u=t.value;planEditItem(meal,i);
+  },
+  planRAddFood:t=>planAddRowFill(t.dataset.meal),
+  planCapHint:()=>planCapHint(),
+  pickMealChg:t=>{pickMeal=t.value},
+  pickSelPrev:t=>{const qty=num('pickQty')||1;renderPickSel(qty,t.value)},
+  cbFood:cbUnitFill,
+  gGoal:()=>{
+    const g=val('gGoal');
+    $('#gGain').style.display=g==='gain'?'block':'none';
+    $('#gCut').style.display=g==='cut'?'block':'none';
+  },
+  trendMA:t=>{trendMA=t.checked;renderTrend()}
+};
+const INP={
+  fBaseHint:()=>fBaseHint(),
+  fStockHint:()=>fStockHint(),
+  fMealHint:()=>fMealHint(),
+  fDayHint:()=>fDayHint(),
+  planCfg:t=>{
+    const M=num('planMax'),T=num('planTol'),De=$('#planDay');
+    if(M>0)db.profile.mealMax=M;
+    if(T>=0)db.profile.mealTol=T;
+    if(De)db.profile.dayMax=De.value.trim()===''?null:Math.max(0,parseFloat(De.value)||0); // 留空/0 = 不限
+    save();
+    if(planSrc==='all'){const el=$('#planList');if(el)el.innerHTML=planStockHTML()}
+  },
+  planQ:t=>{planQuery=t.value;const el=$('#planList');if(el)el.innerHTML=planListHTML(t.value)},
+  planQty:t=>{
+    const fid=t.dataset.fid,v=parseFloat(t.value);
+    if(planSel[fid])planSel[fid].q=isNaN(v)||v<0?0:v;
+    const f=foodById(fid),g=planGrams(fid),el=document.getElementById('planCalc_'+fid);
+    if(f&&el)g>0?(()=>{const n=foodNutr(f,g);el.innerHTML=`→ <b>${Math.round(n.kcal)}</b> kcal · 蛋白 ${n1(n.p)} · 脂肪 ${n1(n.f)} · 碳水 ${n1(n.c)} · 纤维 ${n1(n.fib)}`})():el.innerHTML='';
+    const wrap=t.parentNode?t.parentNode.querySelector('.hint'):null;
+    if(wrap)wrap.textContent='= '+n1(g)+' g';
+    planSum();
+  },
+  planRQ:t=>{
+    const meal=t.dataset.meal,i=+t.dataset.i;
+    const m=(planCache||[]).find(x=>x.k===meal);if(!m)return;
+    const x=m.items[i];if(!x)return;
+    const v=parseFloat(t.value);
+    x.q=isNaN(v)||v<0?0:v;
+    planEditItem(meal,i);
+  },
+  planCapHint:()=>planCapHint(),
+  pickQ:t=>renderPickList(t.value),
+  libQ:t=>{const el=$('#libList');if(el)el.innerHTML=libListHTML(t.value)},
+  pickSelPrev:t=>{
+    const f=foodById(selFid);if(!f)return;
+    const units=f.units&&f.units.length?f.units:[{name:'g',g:1}];
+    const u=units.find(x=>x.name===$('#pickUnit').value)||units[0];
+    const qty=parseFloat(t.value);if(isNaN(qty)||qty<=0)return;
+    const g=+(qty*u.g).toFixed(1),n=foodNutr(f,g);
+    const h=$('#pickPrevHint');
+    if(h)h.innerHTML=`≈ ${n1(g)} g · 热量 ${n1(n.kcal)} kcal（${Math.round(n.kcal*KJ)} kJ）· 蛋白 ${n1(n.p)} · 脂肪 ${n1(n.f)} · 碳水 ${n1(n.c)} · 纤维 ${n1(n.fib)}`;
+  },
+  fMacro:fKcalHint,
+  fKcalIn:t=>{const v=parseFloat(t.value),k=$('#fKj');if(k)k.value=isFinite(v)&&v>0?n1(v*KJ):''},
+  fKjIn:t=>{const v=parseFloat(t.value),k=$('#fKcal');if(k&&!k.disabled)k.value=isFinite(v)&&v>0?n1(v/KJ):'';fKcalHint()},
+  exCalc:exCalc,
+  exKcal:t=>{t.dataset.lock='1'}
+};
+
+/* ---------- 初始化 ---------- */
+function init(){
+  const boot=document.getElementById('boot');if(boot)boot.parentNode.removeChild(boot); // 脚本确实在运行 → 移除兜底提示
+  load();
+  applyTheme();
+  // 主题跟随系统：MediaQueryList.addEventListener 是 Safari 14+ / iOS 14+ 才有，
+  // 旧版 iOS 调用会抛错并中断整个 init（表现为白屏打不开），故两种写法都试并兜底
+  try{
+    const mq=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)');
+    if(mq){
+      const onTheme=()=>{if(db.profile.theme==='auto'){applyTheme();refresh()}};
+      if(mq.addEventListener)mq.addEventListener('change',onTheme);
+      else if(mq.addListener)mq.addListener(onTheme);
+    }
+  }catch(e){}
+  document.querySelectorAll('#tabbar button').forEach(b=>b.addEventListener('click',()=>go(b.dataset.pg)));
+  $('#fileIn').addEventListener('change',onFile);
+  renderDatebar();
+  const tab=lastTab();
+  go(['today','sport','data','me'].includes(tab)?tab:'today');
+  if(!db.profile.sex)openProfile();
+  // 本地存储不可用（如 iOS 用「文件」快速预览打开 html 时）→ 明确告知，避免用户以为数据存上了
+  if(!storageOK())showBanner('⚠️ 当前环境不支持本地存储，本次记录不会保存。请改用 Safari/Chrome 浏览器打开本文件。');
+}
+/* 把运行错误显示出来，避免用户只看到白屏（不依赖其它工具函数，确保任何阶段出错都能显示） */
+function showFatal(msg){
+  try{
+    let box=document.getElementById('fatal');
+    if(!box){
+      box=document.createElement('div');box.id='fatal';
+      box.style.cssText='position:fixed;left:0;right:0;top:0;z-index:999;background:#b91c1c;color:#fff;padding:12px 14px;font-size:13px;line-height:1.6;max-height:60vh;overflow:auto';
+      document.body.appendChild(box);
+    }
+    box.textContent='App 运行出错：'+msg+'　（请把这段文字截图发给开发者）';
+  }catch(e){}
+}
+function showBanner(msg){
+  const b=document.createElement('div');
+  b.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:900;background:#b45309;color:#fff;padding:10px 14px;font-size:13px;line-height:1.5';
+  b.textContent=msg;
+  document.body.appendChild(b);
+  const m=document.querySelector('main');if(m)m.style.paddingBottom='120px';
+}
+function storageOK(){try{localStorage.setItem('__t','1');localStorage.removeItem('__t');return true}catch(e){return false}}
+window.onerror=function(m,s,l,c){showFatal(m+'  ('+l+':'+c+')');return false};
+try{init()}catch(e){showFatal((e&&e.message)?e.message:String(e))} // 必须同步执行：rAF 在后台/隐藏标签页会被节流或不触发，会导致页面空白
+</script>
+</body>
+</html>
