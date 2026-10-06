@@ -1897,8 +1897,10 @@ function onFile(e){
     r.onload=()=>{
       try{
         const data=JSON.parse(r.result);
-        if(!data||data.v!==1||!data.profile||!data.logs)return toast('⚠️ 文件格式不正确');
-        ask(`用备份覆盖当前数据？（当前 ${Object.keys(db.logs).length} 天记录 / ${db.foods.length} 个食物）`,()=>{db=data;save();load();renderDatebar();go('me');toast('✅ 导入成功')});
+        // 备份格式：v2（当前）；v1 是旧版本备份，导入后由 load() 的迁移逻辑升级（会清空食物库与围度）
+        if(!data||typeof data!=='object'||!data.profile||!data.logs||(data.v!==1&&data.v!==2))return toast('⚠️ 文件格式不正确：请选择本 App「⬇️ 导出 JSON」生成的备份文件');
+        const note=data.v===1?'　⚠️ 这是旧版(v1)备份：导入后食物库会清空、围度恢复默认，其余保留。':'';
+        ask(`用备份覆盖当前数据？（当前 ${Object.keys(db.logs).length} 天记录 / ${db.foods.length} 个食物）${note}`,()=>{db=data;save();load();renderDatebar();go('me');toast('✅ 导入成功')});
       }catch(err){toast('⚠️ 文件不是有效的 JSON')}
     };
     r.readAsText(file);
