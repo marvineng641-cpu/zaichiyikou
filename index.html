@@ -259,9 +259,10 @@ function defDb(){return{
   foods:[],combos:[],logs:{},body:[],
   settings:{lastExport:'',tab:'today'}
 }}
-function load(){
+/* 数据迁移与补齐（`load()` 开机时用，导入备份时也用同一份，避免两处规则漂移）。
+   直接改全局 db，返回"是否有改动"。 */
+function migrate(){
   let dirty=false;
-  try{db=JSON.parse(localStorage.getItem(KEY))}catch(e){}
   if(!db||!db.v){db=defDb();dirty=true}
   if(db.v===1){ // v1→v2：按用户要求清空食物库、围度换为左右分列（档案与记录保留）
     db.v=2;db.foods=[];db.metrics=defDb().metrics;dirty=true;
@@ -278,7 +279,11 @@ function load(){
   if(db.microList.length!==before){delete db.targets.micro.chol;dirty=true}
   for(const k of ['nsu','h2o'])if(!db.microList.some(m=>m.key===k)){db.microList.push({key:k,name:MICRO_DEF[k].n,unit:MICRO_DEF[k].u});dirty=true}
   db.metrics.forEach(m=>{if(!m.key){m.key=uid();dirty=true}});
-  if(dirty)save(); // 无变化则不写盘，避免每次打开都重写整库
+  return dirty;
+}
+function load(){
+  try{db=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+  if(migrate())save(); // 无变化则不写盘，避免每次打开都重写整库
 }
 function lastTab(){try{return localStorage.getItem(TABKEY)}catch(e){return null}}
 function save(){
@@ -1893,16 +1898,29 @@ function onFile(e){
   if(!files.length)return;
   const file=files[0];
   if(fileMode==='import'){
+    toast('⏳ 正在读取备份文件（'+Math.max(1,Math.round(file.size/1024))+' KB）…'); // 先给反馈：大文件（含照片）解析要一会儿
     const r=new FileReader();
     r.onload=()=>{
-      try{
-        const data=JSON.parse(r.result);
-        // 备份格式：v2（当前）；v1 是旧版本备份，导入后由 load() 的迁移逻辑升级（会清空食物库与围度）
+      const text=String(r.result);
+      setTimeout(()=>{ // 让上面的提示先显示出来，再做解析这类重活
+        let data=null;
+        try{data=JSON.parse(text)}catch(err){return toast('⚠️ 文件不是有效的 JSON')}
+        // 备份格式：v2（当前）；v1 是旧版本备份，导入后由 migrate() 升级（会清空食物库与围度）
         if(!data||typeof data!=='object'||!data.profile||!data.logs||(data.v!==1&&data.v!==2))return toast('⚠️ 文件格式不正确：请选择本 App「⬇️ 导出 JSON」生成的备份文件');
-        const note=data.v===1?'　⚠️ 这是旧版(v1)备份：导入后食物库会清空、围度恢复默认，其余保留。':'';
-        ask(`用备份覆盖当前数据？（当前 ${Object.keys(db.logs).length} 天记录 / ${db.foods.length} 个食物）${note}`,()=>{db=data;save();load();renderDatebar();go('me');toast('✅ 导入成功')});
-      }catch(err){toast('⚠️ 文件不是有效的 JSON')}
+        const oldV1=data.v===1;
+        const note=oldV1?'　⚠️ 这是旧版(v1)备份：导入后食物库会清空、围度恢复默认，其余保留。':'';
+        ask(`用备份覆盖当前数据？（当前 ${Object.keys(db.logs).length} 天记录 / ${db.foods.length} 个食物）${note}`,()=>{
+          toast('⏳ 正在导入…');
+          setTimeout(()=>{ // 同理：先让"正在导入"显示出来，再做写入
+            db=data;
+            migrate(); // 直接在内存对象上迁移/补齐，不再走 save→load 的字符串往返（大备份能省一次整库解析）
+            save();renderDatebar();go('me');
+            toast(oldV1?'✅ 导入成功（旧版备份已升级为 v2）':'✅ 导入成功');
+          },30);
+        });
+      },30);
     };
+    r.onerror=()=>toast('⚠️ 文件读取失败，请重新选择');
     r.readAsText(file);
   }else if(fileMode==='photo'){
     const out=[];
